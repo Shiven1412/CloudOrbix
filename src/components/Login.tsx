@@ -1,0 +1,243 @@
+import { useState } from "react";
+import { Shield, Cloud, BarChart3, Users, ArrowRight, Lock, Mail, Eye, EyeOff } from "lucide-react";
+
+interface LoginProps {
+  onLogin: (user: { id: number; email: string; firstName: string; lastName: string; roles: string[]; isActive: boolean }, token: string) => void;
+}
+
+export default function Login({ onLogin }: LoginProps) {
+  const [email, setEmail] = useState("admin@enterprise.com");
+  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("Password123!");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleAuth = async (mode: "manual" | "sso") => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch(`/api/auth/${mode === "manual" ? "login" : "sso"}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mode === "manual" ? { email, password } : { email }),
+      });
+
+      const responseText = await response.text();
+      let data: { message?: string; user?: Parameters<typeof onLogin>[0]; token?: string } = {};
+
+      if (responseText) {
+        try {
+          data = JSON.parse(responseText);
+        } catch {
+          throw new Error("The server returned an invalid response. Please try again.");
+        }
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || "Access Denied. Contact Application Administrator.");
+      }
+
+      if (!data.user || !data.token) {
+        throw new Error("The server did not return a valid login session.");
+      }
+
+      onLogin(data.user, data.token);
+    } catch (err) {
+      setError(err instanceof TypeError ? "Unable to reach the CloudOrbix server. Please check that the API is running." : err instanceof Error ? err.message : "Access Denied. Contact Application Administrator.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSSO = () => handleAuth("sso");
+
+  const features = [
+    { icon: Cloud, title: "Multi-Cloud Management", desc: "Azure, AWS, GCP lifecycle visibility" },
+    { icon: BarChart3, title: "Executive Analytics", desc: "10-year trend dashboards & KPIs" },
+    { icon: Users, title: "Client Lifecycle Portal", desc: "End-to-end onboarding & offboarding" },
+    { icon: Shield, title: "Enterprise Security", desc: "Role-based access with Entra ID SSO" },
+  ];
+
+  return (
+    <div className="min-h-screen flex" style={{ fontFamily: "var(--font-sans)" }}>
+      {/* Left Panel */}
+      <div
+        className="hidden lg:flex flex-col justify-between w-[55%] p-12 relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #0F2460 0%, #1E40AF 50%, #1D4ED8 100%)" }}
+      >
+        {/* Background decoration */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #93C5FD, transparent)" }} />
+          <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #60A5FA, transparent)" }} />
+          <svg className="absolute inset-0 w-full h-full opacity-5" viewBox="0 0 600 800">
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5" />
+            </pattern>
+            <rect width="600" height="800" fill="url(#grid)" />
+          </svg>
+        </div>
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-12">
+              <img src="/CloudOrbix.png" alt="CloudOrbix" className="h-10 w-10 rounded-lg object-contain bg-white" />
+            <div>
+              <div className="text-white font-bold text-lg leading-none">CloudOrbix</div>
+              <div className="text-blue-200 text-xs font-medium">Professional Services</div>
+            </div>
+          </div>
+
+          <h1 className="text-5xl font-bold text-white leading-tight mb-4">
+            Manage Client<br />
+            <span className="text-blue-200">Lifecycles</span> with<br />
+            Precision.
+          </h1>
+          <p className="text-blue-100 text-lg leading-relaxed max-w-md">
+            One Platform. Unified Delivery. Measurable Results.
+          </p>
+        </div>
+
+        <div className="relative z-10 space-y-4">
+          {features.map(({ icon: Icon, title, desc }) => (
+            <div key={title} className="flex items-center gap-4 p-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10">
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+                <Icon className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <div className="text-white font-semibold text-sm">{title}</div>
+                <div className="text-blue-200 text-xs">{desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="relative z-10 flex items-center gap-6 text-blue-200 text-xs">
+          <span>v2.4.1 — Production</span>
+          <span>•</span>
+          <span>SOC 2 Type II Compliant</span>
+          <span>•</span>
+          <span>ISO 27001</span>
+        </div>
+      </div>
+
+      {/* Right Panel */}
+      <div className="flex-1 flex items-center justify-center bg-white p-8">
+        <div className="w-full max-w-[400px]">
+          <div className="flex items-center gap-3 mb-10 lg:hidden">
+            <img src="/CloudOrbix.png" alt="CloudOrbix" className="h-8 w-8 rounded-lg object-contain" />
+            <span className="font-bold text-slate-900">CloudOrbix</span>
+          </div>
+
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-slate-900 mb-1">Welcome back</h2>
+            <p className="text-slate-500 text-sm">Sign in to your account to continue</p>
+          </div>
+
+          {/* SSO is temporarily disabled until enterprise identity integration is configured. */}
+          {/*
+          <button
+            onClick={handleSSO}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl font-semibold text-white text-sm transition-all duration-200 mb-6"
+            style={{ background: loading ? "#93BFFF" : "#1E40AF", cursor: loading ? "wait" : "pointer" }}
+          >
+            {loading ? (
+              <>
+                <svg className="animate-spin w-4 h-4 text-white" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="60" strokeDashoffset="20" />
+                </svg>
+                Authenticating with Entra ID...
+              </>
+            ) : (
+              <>
+                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+                  <path d="M11.4 0H0v11.4h11.4V0zm12.6 0H12.6v11.4H24V0zM11.4 12.6H0V24h11.4V12.6zM24 12.6H12.6V24H24V12.6z" />
+                </svg>
+                Sign in with Company Account
+                <ArrowRight className="w-4 h-4 ml-auto" />
+              </>
+            )}
+          </button>
+          */}
+
+          {error && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+              {error}
+            </div>
+          )}
+
+          <div className="relative flex items-center gap-4 mb-6">
+            <div className="flex-1 h-px bg-slate-200" />
+              <span className="text-slate-400 text-xs font-medium">Sign in manually</span>
+            <div className="flex-1 h-px bg-slate-200" />
+          </div>
+
+          <div className="space-y-4 mb-6">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Email Address</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border text-sm outline-none transition-all"
+                  style={{ borderColor: "#E2E8F0", fontSize: "14px" }}
+                  onFocus={e => (e.target.style.borderColor = "#1E40AF")}
+                  onBlur={e => (e.target.style.borderColor = "#E2E8F0")}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-10 py-3 rounded-lg border text-sm outline-none transition-all"
+                  style={{ borderColor: "#E2E8F0" }}
+                  onFocus={e => (e.target.style.borderColor = "#1E40AF")}
+                  onBlur={e => (e.target.style.borderColor = "#E2E8F0")}
+                />
+                <button onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => handleAuth("manual")}
+            disabled={loading}
+            className="w-full py-3 rounded-lg font-semibold text-white text-sm transition-colors"
+            style={{ background: loading ? "#93BFFF" : "#1E40AF" }}
+            onMouseOver={e => ((e.target as HTMLElement).style.background = loading ? "#93BFFF" : "#1D3A9E")}
+            onMouseOut={e => ((e.target as HTMLElement).style.background = loading ? "#93BFFF" : "#1E40AF")}
+          >
+            Sign In
+          </button>
+
+          <div className="mt-8 p-4 rounded-lg bg-slate-50 border border-slate-100">
+            <div className="text-xs text-slate-500 text-center mb-2 font-medium">Need help?</div>
+            <div className="flex justify-center gap-4 text-xs text-blue-600">
+              <a href="#" className="hover:underline">IT Support</a>
+              <span className="text-slate-300">|</span>
+              <a href="#" className="hover:underline">Reset Password</a>
+              <span className="text-slate-300">|</span>
+              <a href="#" className="hover:underline">Contact Admin</a>
+            </div>
+          </div>
+
+          <p className="text-center text-xs text-slate-400 mt-6">
+            <span>CloudOrbix v1.0.0 · © 2026 Capgemini. All rights reserved.</span>
+            <img src="/Capgemini_Logo_Color_RGB.svg" alt="Capgemini" className="mx-auto mt-3 h-6 w-auto" />
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
