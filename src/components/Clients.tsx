@@ -44,6 +44,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; dot: string }> =
   "Pending Onboarding":    { bg: "#DBEAFE", text: "#1D4ED8", dot: "#1D4ED8" },
   "Offboarding Scheduled": { bg: "#FEF3C7", text: "#D97706", dot: "#D97706" },
   "Offboarded":            { bg: "#F1F5F9", text: "#64748B", dot: "#94A3B8" },
+  "On-track": { bg: "rgb(233, 253, 81)", text: "#4e6310", dot: "#204b04" }
 };
 
 const SERVICE_ICONS: Record<string, string> = {
@@ -362,7 +363,11 @@ useEffect(() => {
             </thead>
             <tbody>
               {paged.map(c => {
-                const sc = STATUS_COLORS[c.status];
+                const sc = STATUS_COLORS[c.status] || {
+  bg: dark ? "#334155" : "#F1F5F9",
+  text: dark ? "#E2E8F0" : "#475569",
+  dot: dark ? "#94A3B8" : "#64748B",
+};
                 const isSelected = selected.includes(c.id);
                 return (
                   <tr key={c.id} className="border-b transition-colors" style={{ borderColor: border, background: isSelected ? (dark ? "#172554" : "#EFF6FF") : "transparent" }}
@@ -376,6 +381,8 @@ useEffect(() => {
                     <td className="px-4 py-3 font-mono text-xs" style={{ color: muted }}>{c.id}</td>
                     <td className="px-4 py-3 text-xs" style={{ color: text }}>{(c as any).year || "-"}</td>
                     <td className="px-4 py-3">
+                      
+                      
                       <button onClick={() => onOpenProject?.(c.id)} className="font-semibold text-xs text-left hover:underline" style={{ color: "#1E40AF" }}>{c.name}</button>
                       <div className="text-[10px] mt-1 leading-relaxed" style={{ color: muted }}>{(c as any).year || "-"} · {(c as any).projectType || "Project"} · {(c as any).hyperscaler || "-"} · PM: {(c as any).projectManager || c.accountManager} · ISOW: {(c as any).isow || "-"}</div>
                       <div className="text-[10px]" style={{ color: muted }}>Progress: {(c as any).completion || 0}% · Est: {(c as any).estimatedStartDate || "-"} to {(c as any).estimatedEndDate || "-"} · Actual: {(c as any).actualStartDate || "-"} to {(c as any).actualEndDate || "-"}</div>
@@ -393,7 +400,37 @@ useEffect(() => {
                     <td className="px-4 py-3 text-xs font-semibold" style={{ color: text }}>
                       {c.revenue > 0 ? `$${(c.revenue / 1000000).toFixed(1)}M` : "—"}
                     </td>
-                    <td className="px-4 py-3 text-xs font-semibold" style={{ color: text }}>{(c as any).completion || 0}%</td>
+                    <td className="px-4 py-3">
+  <div className="relative w-10 h-10 mx-auto">
+    <svg className="w-10 h-10 -rotate-90">
+      <circle
+        cx="20"
+        cy="20"
+        r="16"
+        stroke="#E5E7EB"
+        strokeWidth="4"
+        fill="none"
+      />
+      <circle
+        cx="20"
+        cy="20"
+        r="16"
+        stroke="#22C55E"
+        strokeWidth="4"
+        fill="none"
+        strokeLinecap="round"
+        strokeDasharray={100.53}
+        strokeDashoffset={
+          100.53 * (1 - (((c as any).completion || 0) / 100))
+        }
+      />
+    </svg>
+
+    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-semibold">
+      {(c as any).completion || 0}%
+    </span>
+  </div>
+</td>
                     <td className="px-4 py-3 text-xs" style={{ color: text }}>{(c as any).hyperscaler || "-"}</td>
                     <td className="px-4 py-3 text-xs" style={{ color: text }}>{(c as any).projectType || "-"}</td>
                     <td className="px-4 py-3 text-xs max-w-[220px]" style={{ color: muted }}>{(c as any).projectBrief || "-"}</td>
@@ -458,7 +495,10 @@ useEffect(() => {
       {/* Add Client Wizard Modal */}
       {showAdd && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)" }}>
-          <div className="w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden" style={{ background: bg }}>
+          <div
+  className="w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+  style={{ background: bg }}
+>
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: border }}>
               <div>
@@ -481,7 +521,11 @@ useEffect(() => {
             </div>
 
             {/* Step Content */}
-            <div className="px-6 py-5 min-h-[280px]">
+            <div
+  className="px-6 py-5 overflow-y-auto flex-1"
+  style={{ maxHeight: "65vh" }}
+>
+
               {step === 0 && (
                 <div className="grid grid-cols-2 gap-4">
                   {[

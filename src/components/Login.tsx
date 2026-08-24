@@ -56,38 +56,43 @@ export default function Login({ onLogin }: LoginProps) {
     { icon: Cloud, title: "Multi-Cloud Management", desc: "Azure, AWS, GCP lifecycle visibility" },
     { icon: BarChart3, title: "Executive Analytics", desc: "10-year trend dashboards & KPIs" },
     { icon: Users, title: "Client Lifecycle Portal", desc: "End-to-end onboarding & offboarding" },
-    { icon: Shield, title: "Enterprise Security", desc: "Role-based access with Entra ID SSO" },
+    // { icon: Shield, title: "Enterprise Security", desc: "Role-based access with Entra ID SSO" },
   ];
 
   return (
-    <div className="min-h-screen flex" style={{ fontFamily: "var(--font-sans)" }}>
+    <div className="min-h-screen flex" style={{ 
+      backgroundImage: "url('/bg.png')",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+       backgroundRepeat: "no-repeat",
+      fontFamily: "var(--font-sans)" }}>
       {/* Left Panel */}
       <div
         className="hidden lg:flex flex-col justify-between w-[55%] p-12 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #0F2460 0%, #1E40AF 50%, #1D4ED8 100%)" }}
+        style={{  }}
       >
         {/* Background decoration */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #93C5FD, transparent)" }} />
-          <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #60A5FA, transparent)" }} />
+          <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #3ad8f4, transparent)" }} />
           <svg className="absolute inset-0 w-full h-full opacity-5" viewBox="0 0 600 800">
             <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5" />
+              <path d="M 80 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5" />
             </pattern>
             <rect width="600" height="800" fill="url(#grid)" />
           </svg>
-        </div>
+        </div> */}
 
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-12">
-              <img src="/CloudOrbix.png" alt="CloudOrbix" className="h-10 w-10 rounded-lg object-contain bg-white" />
+        <div className="relative z-10 ">
+          <div className="flex items-center gap-5 mb-20 ml-0 mt-0">
+              <img src="/CloudOrbix.png" alt="CloudOrbix" className="h-20 w-20 rounded-lg object-contain " />
             <div>
-              <div className="text-white font-bold text-lg leading-none">CloudOrbix</div>
-              <div className="text-blue-200 text-xs font-medium">Professional Services</div>
+              <div className="text-white font-bold text-3xl leading-none">CloudOrbix</div>
+              <div className="text-blue-100 text-xs font-medium">Orbiting Every Project Aroun Success</div>
             </div>
           </div>
 
-          <h1 className="text-5xl font-bold text-white leading-tight mb-4">
+          <h1 className="text-3xl font-bold text-white leading-tight mb-4">
             Manage Client<br />
             <span className="text-blue-200">Lifecycles</span> with<br />
             Precision.
@@ -121,16 +126,16 @@ export default function Login({ onLogin }: LoginProps) {
       </div>
 
       {/* Right Panel */}
-      <div className="flex-1 flex items-center justify-center bg-white p-8">
+      <div className="flex-1 flex items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm border m-13 " style={{ border:"1px #3ad8f4" ,  borderStyle: "solid", boxShadow: "0 1px 10px rgba(0, 0, 0, 0.1)" }}>
         <div className="w-full max-w-[400px]">
-          <div className="flex items-center gap-3 mb-10 lg:hidden">
+          <div className="flex items-center gap-4 mb-30 lg:hidden m-3">
             <img src="/CloudOrbix.png" alt="CloudOrbix" className="h-8 w-8 rounded-lg object-contain" />
-            <span className="font-bold text-slate-900">CloudOrbix</span>
+            <span className="font-bold text-slate-200">CloudOrbix</span>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-1">Welcome back</h2>
-            <p className="text-slate-500 text-sm">Sign in to your account to continue</p>
+            <h2 className="text-2xl font-bold text-slate-100 mb-1">Welcome back</h2>
+            <p className="text-slate-100 text-sm">Sign in to your account to continue</p>
           </div>
 
           {/* SSO is temporarily disabled until enterprise identity integration is configured. */}
@@ -167,16 +172,16 @@ export default function Login({ onLogin }: LoginProps) {
           )}
 
           <div className="relative flex items-center gap-4 mb-6">
-            <div className="flex-1 h-px bg-slate-200" />
-              <span className="text-slate-400 text-xs font-medium">Sign in manually</span>
+            <div className="flex-1 h-px bg-cyan-100" />
+              <span className="text-slate-100 text-xs font-medium">Sign in manually</span>
             <div className="flex-1 h-px bg-slate-200" />
           </div>
 
           <div className="space-y-4 mb-6">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Email Address</label>
+              <label className="block text-xs font-semibold text-slate-200 mb-1.5">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-100" />
                 <input
                   type="email"
                   value={email}
@@ -184,15 +189,15 @@ export default function Login({ onLogin }: LoginProps) {
                   placeholder="you@company.com"
                   className="w-full pl-10 pr-4 py-3 rounded-lg border text-sm outline-none transition-all"
                   style={{ borderColor: "#E2E8F0", fontSize: "14px" }}
-                  onFocus={e => (e.target.style.borderColor = "#1E40AF")}
+                  onFocus={e => (e.target.style.borderColor = "#27fbff")}
                   onBlur={e => (e.target.style.borderColor = "#E2E8F0")}
                 />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Password</label>
+              <label className="block text-xs font-semibold text-slate-200 mb-1.5">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-200" />
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
@@ -200,10 +205,10 @@ export default function Login({ onLogin }: LoginProps) {
                   placeholder="••••••••"
                   className="w-full pl-10 pr-10 py-3 rounded-lg border text-sm outline-none transition-all"
                   style={{ borderColor: "#E2E8F0" }}
-                  onFocus={e => (e.target.style.borderColor = "#1E40AF")}
+                  onFocus={e => (e.target.style.borderColor = "#27fbff")}
                   onBlur={e => (e.target.style.borderColor = "#E2E8F0")}
                 />
-                <button onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <button onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-100 hover:text-slate-200">
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
@@ -238,6 +243,7 @@ export default function Login({ onLogin }: LoginProps) {
           </p>
         </div>
       </div>
+      
     </div>
   );
 }

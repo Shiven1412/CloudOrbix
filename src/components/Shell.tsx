@@ -196,13 +196,7 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
         {/* Main content */}
         <main className="flex-1 overflow-y-auto" style={{ background: pageBg }}>
           {children}
-          <footer className="flex flex-wrap items-center justify-between gap-4 border-t px-6 py-3 text-xs" style={{ background: "#2453C5", borderColor, color: "#FFFFFF" }}>
-            <div className="flex items-center gap-3"><img src="/Capgemini_Logo_Color_RGB.svg" alt="Capgemini" className="h-6 w-auto brightness-0 invert" /><span>All rights reserved</span></div>
-            <span className="hidden md:block">Managed and maintained by <strong> CIS Professional Services </strong></span>
-            {/* <span className="hidden lg:block">Submit Feedback</span> */}
-            <span className="hidden lg:block">Contact Us</span>
-            <span>Production | Version: 2.6.1 | Build Number: 0.3.0</span>
-          </footer>
+         
         </main>
       </div>
     </div>
