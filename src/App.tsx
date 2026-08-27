@@ -13,6 +13,7 @@ const SimplePage = lazy(() => import("./components/SimplePage"));
 const ProjectPage = lazy(() => import("./components/ProjectPage"));
 const DocumentsPage = lazy(() => import("./components/DocumentsPage"));
 const ProjectRepository = lazy(() => import("./components/ProjectRepository"));
+const ServiceCatalogue = lazy(() => import("./components/ServiceCatalogue"));
 
 type AuthUser = {
   id: number;
@@ -34,7 +35,7 @@ const getStoredUser = (): AuthUser | null => {
 
 const getInitialPage = (): Page => {
   const hash = window.location.hash.replace(/^#/, "") as Page;
-  const validPages: Page[] = ["dashboard", "clients", "reports", "excel", "audit", "admin", "help", "project", "documents", "repository"];
+  const validPages: Page[] = ["dashboard", "clients", "reports", "excel", "audit", "admin", "help", "project", "documents", "repository", "servicecatalogue"];
   return validPages.includes(hash) ? hash : "dashboard";
 };
 
@@ -125,7 +126,8 @@ export default function App() {
       case "clients":     return <Clients dark={dark} user={user} initialSearch={globalSearch} onOpenProject={(id) => openProject(id)} />;
       case "project":     return projectId ? <ProjectPage dark={dark} clientId={projectId} user={user} onBack={() => navigateTo("clients")} onOpenDocuments={() => navigateTo("documents")} /> : <Clients dark={dark} user={user} initialSearch={globalSearch} onOpenProject={(id) => openProject(id)} />;
       case "documents":  return projectId ? <DocumentsPage dark={dark} clientId={projectId} readOnly={repositoryDocuments} onBack={() => navigateTo(repositoryDocuments ? "repository" : "project")} /> : <Clients dark={dark} user={user} initialSearch={globalSearch} onOpenProject={(id) => openProject(id)} />;
-        case "repository": return <ProjectRepository dark={dark} onOpenProject={(id) => openProject(id, "documents")} />;
+      case "repository": return <ProjectRepository dark={dark} onOpenProject={(id) => openProject(id, "documents")} />;
+      case "servicecatalogue": return <ServiceCatalogue />;
       case "excel":       return user.roles.includes("Admin") ? <ExcelImport dark={dark} /> : <Dashboard dark={dark} onNavigate={p => navigateTo(p as Page)} user={user} />;
       case "reports":     return <Reports dark={dark} />;
       case "audit":       return user.roles.includes("Admin") ? <AuditLogs dark={dark} /> : <Dashboard dark={dark} onNavigate={p => navigateTo(p as Page)} user={user} />;

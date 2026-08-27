@@ -3,17 +3,18 @@ import {
   LayoutDashboard, Users, FileArchive,
   FileText, Settings, HelpCircle, Bell, Search, Moon, Sun,
   ChevronLeft, ChevronRight, LogOut, ChevronDown, Upload,
-  ClipboardList, Shield, Menu, X
+  ClipboardList, Shield, Menu, X, BookOpen
 } from "lucide-react";
 import { type CloudOrbixAlert } from "../alert";
 
 export type Page =
-  | "dashboard" | "clients" | "reports" | "excel" | "audit" | "admin" | "help" | "project" | "documents" | "repository";
+  | "dashboard" | "clients" | "reports" | "excel" | "audit" | "admin" | "help" | "project" | "documents" | "repository" | "servicecatalogue";
 
 const navItems: { id: Page; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "clients", label: "Projects", icon: Users },
   { id: "repository", label: "Project Repository", icon: FileArchive },
+  { id: "servicecatalogue", label: "Service Catalogue", icon: BookOpen },
   { id: "reports", label: "Reports", icon: FileText },
   { id: "excel", label: "Excel Import", icon: Upload },
   { id: "audit", label: "Audit Logs", icon: ClipboardList },
