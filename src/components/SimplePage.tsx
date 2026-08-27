@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { UserPlus, UserMinus, Server, HelpCircle, CalendarDays, AlertCircle, RefreshCw } from "lucide-react";
-import { upcomingActivities, clients } from "../data/mockData";
 
 interface SimplePageProps { page: string; dark: boolean; }
 
 export default function SimplePage({ page, dark }: SimplePageProps) {
-  const [liveClients, setLiveClients] = useState(clients);
+  const [liveClients, setLiveClients] = useState<any[]>([]);
   const [serviceData, setServiceData] = useState<any[]>([]);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const bg = dark ? "#1E293B" : "#FFFFFF";
@@ -30,7 +29,7 @@ export default function SimplePage({ page, dark }: SimplePageProps) {
   if (page === "onboarding") {
     const today = new Date().toISOString().slice(0, 10);
     const pending = liveClients.filter(c => c.status !== "Offboarded" && c.plannedOnboard && c.plannedOnboard <= today);
-    const upcoming = upcomingActivities.filter(a => a.type === "onboarding");
+    const upcoming = liveClients.filter((client) => client.status !== "Offboarded" && client.plannedOnboard);
     return (
       <div className="p-6 space-y-5" style={{ color: text }}>
         <div>
@@ -39,8 +38,8 @@ export default function SimplePage({ page, dark }: SimplePageProps) {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[{ label: "Pending Onboarding", value: pending.length, color: "#D97706", bg: "#FEF3C7" },
-            { label: "Scheduled This Month", value: 2, color: "#1E40AF", bg: "#DBEAFE" },
-            { label: "Avg Onboarding Days", value: "3.4", color: "#16A34A", bg: "#DCFCE7" }
+            { label: "Scheduled This Month", value: upcoming.length, color: "#1E40AF", bg: "#DBEAFE" },
+            { label: "Avg Onboarding Days", value: "-", color: "#16A34A", bg: "#DCFCE7" }
           ].map(k => (
             <div key={k.label} className="rounded-xl border p-5" style={{ background: bg, borderColor: border }}>
               <div className="text-3xl font-bold mb-1" style={{ color: k.color }}>{k.value}</div>
@@ -81,7 +80,7 @@ export default function SimplePage({ page, dark }: SimplePageProps) {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[{ label: "Scheduled Offboarding", value: scheduled.length, color: "#D97706", bg: "#FEF3C7" },
             { label: "Offboarded YTD", value: offboarded.length, color: "#64748B", bg: "#F1F5F9" },
-            { label: "Avg Offboarding Days", value: "4.8", color: "#DC2626", bg: "#FEE2E2" }
+            { label: "Avg Offboarding Days", value: "-", color: "#DC2626", bg: "#FEE2E2" }
           ].map(k => (
             <div key={k.label} className="rounded-xl border p-5" style={{ background: bg, borderColor: border }}>
               <div className="text-3xl font-bold mb-1" style={{ color: k.color }}>{k.value}</div>

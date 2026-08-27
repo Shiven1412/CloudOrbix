@@ -1,7 +1,13 @@
 import jwt from 'jsonwebtoken';
+import crypto from 'node:crypto';
 import { getUserByEmail } from '../db.js';
+import { hasAnyRole } from '../lib/permissions.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'clmp-dev-secret';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? null : crypto.randomBytes(32).toString('hex'));
+
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+  throw new Error('JWT_SECRET must be configured with at least 32 characters.');
+}
 
 export function generateToken(user) {
   return jwt.sign(
@@ -48,7 +54,7 @@ export async function protectRoute(req, res, next) {
 export function requireRole(...allowedRoles) {
   return (req, res, next) => {
     const userRoles = req.user?.roles || [];
-    const hasAccess = allowedRoles.some((role) => userRoles.includes(role));
+    const hasAccess = hasAnyRole(userRoles, allowedRoles);
 
     if (!hasAccess) {
       return res.status(403).json({ message: 'Access Denied. Contact Application Administrator.' });

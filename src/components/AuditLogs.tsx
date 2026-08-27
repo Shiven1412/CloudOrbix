@@ -114,7 +114,7 @@ export default function AuditLogs({ dark }: AuditLogsProps) {
                     <div className="hidden sm:block w-28">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0" style={{ background: "#1E40AF" }}>
-                          {log.user === "Admin System" ? "⚙" : log.user.split(" ").map(n => n[0]).join("")}
+                          {log.user === "Admin System" ? "⚙" : log.user.split(" ").map((n: string) => n[0]).join("")}
                         </div>
                         <span className="text-xs truncate" style={{ color: text }}>{log.user.split(" ")[0]}</span>
                       </div>

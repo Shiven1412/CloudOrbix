@@ -83,7 +83,7 @@ export function KPIRadialCard({
         <div className="h-16 w-16 shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <RadialBarChart cx="50%" cy="50%" innerRadius="54%" outerRadius="82%" barSize={10} data={data} startAngle={90} endAngle={-270}>
-              <RadialBar background clockWise dataKey="value" cornerRadius={999} fill={accent} />
+              <RadialBar background dataKey="value" cornerRadius={999} fill={accent} />
             </RadialBarChart>
           </ResponsiveContainer>
         </div>
@@ -125,7 +125,7 @@ export function KPISparklineCard({
     <ResponsiveContainer width="100%" height={60}>
       <LineChart data={data} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-        <Tooltip formatter={(val: number) => [`${val}`, "Trend"]} labelFormatter={() => ""} />
+        <Tooltip formatter={(value: unknown) => [`${value ?? ""}`, "Trend"]} labelFormatter={() => ""} />
         <Line type="monotone" dataKey="value" stroke={accent} strokeWidth={2.5} dot={false} />
       </LineChart>
     </ResponsiveContainer>

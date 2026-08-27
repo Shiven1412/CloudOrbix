@@ -3,8 +3,13 @@ import {
   AreaChart, Area, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, FunnelChart, Funnel, LabelList
 } from "recharts";
-import { onboardingTrend, revenueTrend, serviceAdoption, regionData, industryData } from "../data/mockData";
 import { Filter, Download } from "lucide-react";
+
+const onboardingTrend: any[] = [];
+const revenueTrend: any[] = [];
+const serviceAdoption: any[] = [];
+const regionData: any[] = [];
+const industryData: any[] = [];
 
 interface AnalyticsProps { dark: boolean; }
 
@@ -12,28 +17,11 @@ const netGrowth = onboardingTrend.map(d => ({ ...d, net: d.onboarded - d.offboar
 let cum = 72;
 netGrowth.forEach(d => { cum += d.net; d.cumulative = cum; });
 
-const retentionData = [
-  { month: "Jan", rate: 94.2 }, { month: "Feb", rate: 93.8 }, { month: "Mar", rate: 95.1 },
-  { month: "Apr", rate: 94.7 }, { month: "May", rate: 96.2 }, { month: "Jun", rate: 95.8 },
-  { month: "Jul", rate: 94.1 }, { month: "Aug", rate: 96.5 }, { month: "Sep", rate: 97.2 },
-  { month: "Oct", rate: 96.8 }, { month: "Nov", rate: 97.5 }, { month: "Dec", rate: 98.1 },
-];
+const retentionData: any[] = [];
 
-const funnelData = [
-  { name: "Prospects", value: 240, fill: "#BFDBFE" },
-  { name: "Qualified", value: 168, fill: "#93C5FD" },
-  { name: "Proposal Sent", value: 112, fill: "#60A5FA" },
-  { name: "Negotiation", value: 76, fill: "#3B82F6" },
-  { name: "Onboarded", value: 48, fill: "#1E40AF" },
-];
+const funnelData: any[] = [];
 
-const accountMgrPerf = [
-  { name: "Sarah Chen", clients: 24, revenue: 8.2, satisfaction: 4.7 },
-  { name: "James Rodriguez", clients: 21, revenue: 7.5, satisfaction: 4.5 },
-  { name: "Priya Sharma", clients: 19, revenue: 6.1, satisfaction: 4.8 },
-  { name: "Michael Park", clients: 22, revenue: 9.3, satisfaction: 4.6 },
-  { name: "Lisa Wang", clients: 18, revenue: 6.8, satisfaction: 4.9 },
-];
+const accountMgrPerf: any[] = [];
 
 const PIE_COLORS = ["#1E40AF", "#3B82F6", "#60A5FA", "#93C5FD", "#BFDBFE", "#DBEAFE", "#EFF6FF", "#F0F9FF"];
 
@@ -228,7 +216,7 @@ export default function Analytics({ dark }: AnalyticsProps) {
                   <td className="py-3 px-3">
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: "#1E40AF" }}>
-                        {m.name.split(" ").map(n => n[0]).join("")}
+                        {m.name.split(" ").map((n: string) => n[0]).join("")}
                       </div>
                       <span className="text-xs font-medium" style={{ color: text }}>{m.name}</span>
                     </div>

@@ -1,22 +1,19 @@
 import { useState, useRef, useEffect } from "react";
 import {
-  LayoutDashboard, Users, UserPlus, UserMinus, Server, BarChart3,
+  LayoutDashboard, Users, FileArchive,
   FileText, Settings, HelpCircle, Bell, Search, Moon, Sun,
   ChevronLeft, ChevronRight, LogOut, ChevronDown, Upload,
   ClipboardList, Shield, Menu, X
 } from "lucide-react";
+import { type CloudOrbixAlert } from "../alert";
 
 export type Page =
-  | "dashboard" | "clients" | "onboarding" | "offboarding"
-  | "services" | "analytics" | "reports" | "excel" | "audit" | "admin" | "help" | "project";
+  | "dashboard" | "clients" | "reports" | "excel" | "audit" | "admin" | "help" | "project" | "documents" | "repository";
 
 const navItems: { id: Page; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "clients", label: "Clients", icon: Users },
-  { id: "onboarding", label: "Onboarding", icon: UserPlus },
-  { id: "offboarding", label: "Offboarding", icon: UserMinus },
-  { id: "services", label: "Services", icon: Server },
-  { id: "analytics", label: "Analytics", icon: BarChart3 },
+  { id: "clients", label: "Projects", icon: Users },
+  { id: "repository", label: "Project Repository", icon: FileArchive },
   { id: "reports", label: "Reports", icon: FileText },
   { id: "excel", label: "Excel Import", icon: Upload },
   { id: "audit", label: "Audit Logs", icon: ClipboardList },
@@ -40,6 +37,8 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [screenAlert, setScreenAlert] = useState<CloudOrbixAlert | null>(null);
+  const [alertTimer, setAlertTimer] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -53,6 +52,17 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  useEffect(() => {
+    const handleAlert = (event: Event) => {
+      const alert = (event as CustomEvent<CloudOrbixAlert>).detail;
+      setScreenAlert(alert);
+      if (alertTimer) window.clearTimeout(alertTimer);
+      setAlertTimer(window.setTimeout(() => setScreenAlert(null), 4500));
+    };
+    window.addEventListener("cloudorbix-alert", handleAlert);
+    return () => window.removeEventListener("cloudorbix-alert", handleAlert);
+  }, [alertTimer]);
+
   const bg = dark ? "#0F172A" : "#FFFFFF";
   const sidebarBg = dark ? "#1E293B" : "#FFFFFF";
   const borderColor = dark ? "#334155" : "#E2E8F0";
@@ -60,24 +70,37 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
   const textBody = dark ? "#E2E8F0" : "#0F172A";
   const pageBg = dark ? "#0F172A" : "#F1F5F9";
 
-  const notifications = [
-    { id: 1, text: "Stratos Logistics onboarding due in 3 days", type: "warning", time: "2h ago" },
-    { id: 2, text: "Excel import #112 completed — 14 records", type: "success", time: "4h ago" },
-    { id: 3, text: "Vortex Capital offboarding scheduled for Sep 30", type: "info", time: "1d ago" },
-    { id: 4, text: "Monthly KPI report is ready for download", type: "info", time: "2d ago" },
-  ];
+  const [notifications, setNotifications] = useState<{ id: string; text: string; type: string; time: string }[]>([]);
+  useEffect(() => {
+    const token = localStorage.getItem("clmp-token");
+    if (!token) return;
+    fetch("/api/dashboard", { headers: { Authorization: `Bearer ${token}` } }).then((response) => response.ok ? response.json() : null).then((payload) => {
+      const alerts = (payload?.upcomingActivities || []).map((item: any, index: number) => ({ id: `${item.client}-${index}`, text: item.type === "delay" ? `Project delay requires attention: ${item.client}` : `${item.type === "offboarding" ? "Offboarding" : "Onboarding"} due for ${item.client}`, type: item.type === "delay" ? "warning" : item.type === "offboarding" ? "warning" : "info", time: item.date }));
+      setNotifications(alerts);
+    }).catch(() => undefined);
+  }, [user]);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: pageBg, color: textBody, fontFamily: "var(--font-sans)" }}>
+      {screenAlert && (
+        <div className="fixed top-20 right-5 z-[100] w-[min(380px,calc(100vw-2rem))] rounded-2xl border shadow-2xl overflow-hidden" role="alert" style={{ background: bg, borderColor: screenAlert.tone === "error" ? "#FECACA" : screenAlert.tone === "warning" ? "#FDE68A" : screenAlert.tone === "success" ? "#BBF7D0" : borderColor }}>
+          <div className="flex items-start gap-3 p-4">
+            <div className="w-2 self-stretch rounded-full" style={{ background: screenAlert.tone === "error" ? "#DC2626" : screenAlert.tone === "warning" ? "#D97706" : screenAlert.tone === "success" ? "#16A34A" : "#1E40AF" }} />
+            <div className="flex-1"><div className="text-xs font-bold" style={{ color: "#1E40AF" }}>CloudOrbix Alert</div><div className="text-sm mt-1" style={{ color: textBody }}>{screenAlert.message}</div></div>
+            <button onClick={() => setScreenAlert(null)} className="p-1" aria-label="Dismiss alert" style={{ color: textMuted }}><X className="w-4 h-4" /></button>
+          </div>
+          <div className="h-1" style={{ background: screenAlert.tone === "error" ? "#DC2626" : screenAlert.tone === "warning" ? "#D97706" : screenAlert.tone === "success" ? "#16A34A" : "#1E40AF" }} />
+        </div>
+      )}
       {/* Top Nav */}
       <header className="flex items-center h-14 px-4 gap-4 flex-shrink-0 border-b z-30" style={{ background: bg, borderColor }}>
         <button className="lg:hidden p-1.5 rounded-md text-slate-500 hover:bg-slate-100" onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <button className="flex items-center gap-2 flex-shrink-0" onClick={() => onPageChange("dashboard")} aria-label="Go to dashboard">
           <img src="/CloudOrbix.png" alt="CloudOrbix" className="h-7 w-7 object-contain" />
           {!collapsed && <span className="font-bold text-sm hidden lg:block" style={{ color: "#1E40AF" }}>CloudOrbix</span>}
-        </div>
+        </button>
 
         {/* Search */}
         <div className="flex-1 max-w-md relative hidden sm:block">
@@ -104,19 +127,30 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
               <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500" />
             </button>
             {notifOpen && (
-              <div className="absolute right-0 top-10 w-80 rounded-xl shadow-xl border z-50 overflow-hidden" style={{ background: bg, borderColor }}>
-                <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor }}>
-                  <span className="font-semibold text-sm">Notifications</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium">4 new</span>
+              <div className="absolute right-0 top-11 w-[360px] rounded-2xl shadow-2xl border z-50 overflow-hidden" style={{ background: bg, borderColor, boxShadow: dark ? "0 18px 50px rgba(0,0,0,.35)" : "0 18px 50px rgba(15,23,42,.16)" }}>
+                <div className="px-5 py-4 border-b flex items-center justify-between" style={{ borderColor, background: dark ? "#172554" : "#EFF6FF" }}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#1E40AF", color: "#FFFFFF" }}>
+                      <Bell className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-sm" style={{ color: textBody }}>CloudOrbix Alert</div>
+                      <div className="text-[10px] mt-0.5" style={{ color: textMuted }}>Important project activity</div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] px-2 py-1 rounded-full bg-white text-blue-700 font-bold">4 new</span>
                 </div>
                 {notifications.map(n => (
-                  <div key={n.id} className="px-4 py-3 border-b hover:bg-slate-50 cursor-pointer" style={{ borderColor }}>
-                    <div className="text-xs font-medium mb-0.5" style={{ color: textBody }}>{n.text}</div>
-                    <div className="text-xs" style={{ color: textMuted }}>{n.time}</div>
+                  <div key={n.id} className="px-5 py-3 border-b flex gap-3 hover:bg-slate-50 cursor-pointer" style={{ borderColor }}>
+                    <div className="w-1 rounded-full flex-shrink-0" style={{ background: n.type === "warning" ? "#D97706" : n.type === "success" ? "#16A34A" : "#3B82F6" }} />
+                    <div>
+                      <div className="text-xs font-semibold mb-1" style={{ color: textBody }}>{n.text}</div>
+                      <div className="text-[10px]" style={{ color: textMuted }}>{n.time}</div>
+                    </div>
                   </div>
                 ))}
                 <div className="px-4 py-2 text-center">
-                  <button className="text-xs font-medium" style={{ color: "#1E40AF" }}>View all notifications</button>
+                  <button className="text-xs font-semibold" style={{ color: "#1E40AF" }}>View all alerts</button>
                 </div>
               </div>
             )}
@@ -127,7 +161,7 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
             <button onClick={() => setProfileOpen(!profileOpen)} className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors">
               <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: "#1E40AF" }}>SC</div>
               <div className="hidden sm:block text-left">
-                <div className="text-xs font-semibold" style={{ color: textBody }}>{user ? `${user.firstName} ${user.lastName}` : "Sarah Chen"}</div>
+                <div className="text-xs font-semibold" style={{ color: textBody }}>{user ? `${user.firstName} ${user.lastName}` : ""}</div>
                 <div className="text-[10px]" style={{ color: textMuted }}>{user ? user.roles[0] : "Account Manager"}</div>
               </div>
               <ChevronDown className="w-3 h-3" style={{ color: textMuted }} />
@@ -135,7 +169,7 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
             {profileOpen && (
               <div className="absolute right-0 top-11 w-48 rounded-xl shadow-xl border z-50 overflow-hidden" style={{ background: bg, borderColor }}>
                 <div className="p-3 border-b" style={{ borderColor }}>
-                  <div className="text-xs font-semibold" style={{ color: textBody }}>{user ? `${user.firstName} ${user.lastName}` : "Sarah Chen"}</div>
+                  <div className="text-xs font-semibold" style={{ color: textBody }}>{user ? `${user.firstName} ${user.lastName}` : ""}</div>
                   <div className="text-[10px]" style={{ color: textMuted }}>{user ? user.email : "s.chen@enterprise.com"}</div>
                 </div>
                 <button onClick={() => { onPageChange("admin"); setProfileOpen(false); }} className="w-full text-left px-3 py-2 text-xs hover:bg-slate-50 flex items-center gap-2" style={{ color: textBody }}>
@@ -157,7 +191,7 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
           style={{ background: sidebarBg, borderColor }}
         >
           <div className="flex-1 py-3 overflow-y-auto">
-            {navItems.map(({ id, label, icon: Icon }) => {
+            {navItems.filter(({ id }) => !["admin", "excel", "audit"].includes(id) || user?.roles.includes("Admin")).map(({ id, label, icon: Icon }) => {
               const active = page === id;
               return (
                 <button

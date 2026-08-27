@@ -1,6 +1,10 @@
 import 'dotenv/config';
+import crypto from 'node:crypto';
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import * as Sentry from '@sentry/node';
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import roleRoutes from './routes/roles.js';
@@ -15,8 +19,27 @@ import { initializeDatabase } from './db.js';
 
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+const isProduction = process.env.NODE_ENV === 'production';
+const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',').map((origin) => origin.trim()).filter(Boolean);
+
+if (isProduction && !process.env.DATABASE_URL) throw new Error('DATABASE_URL is required in production.');
+if (isProduction && !process.env.CORS_ORIGINS) throw new Error('CORS_ORIGINS is required in production.');
+if (process.env.SENTRY_DSN) Sentry.init({ dsn: process.env.SENTRY_DSN, environment: process.env.NODE_ENV || 'development', tracesSampleRate: isProduction ? 0.1 : 0 });
+
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+app.use((req, res, next) => {
+  const requestId = req.get('x-request-id') || crypto.randomUUID();
+  res.setHeader('x-request-id', requestId);
+  req.requestId = requestId;
+  if (isProduction && req.path !== '/api/health' && req.get('x-forwarded-proto') !== 'https') return res.redirect(308, `https://${req.get('host')}${req.originalUrl}`);
+  next();
+});
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(cors({ origin: isProduction ? allowedOrigins : true, credentials: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, limit: 20, standardHeaders: 'draft-7', legacyHeaders: false }));
+app.use('/api', rateLimit({ windowMs: 60 * 1000, limit: 300, standardHeaders: 'draft-7', legacyHeaders: false }));
 
 app.get('/', (req, res) => {
   res.json({
@@ -49,8 +72,10 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/services', serviceRoutes);
 
+if (process.env.SENTRY_DSN) Sentry.setupExpressErrorHandler(app);
+
 app.use((error, req, res, next) => {
-  console.error('Unhandled API error:', error);
+  console.error('Unhandled API error:', { requestId: req.requestId, method: req.method, path: req.path, message: error.message, stack: isProduction ? undefined : error.stack });
   res.status(500).json({ message: 'Internal server error.' });
 });
 

@@ -1,16 +1,21 @@
 import { useState } from "react";
 import { Shield, Cloud, BarChart3, Users, ArrowRight, Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { showCloudOrbixAlert } from "../alert";
 
 interface LoginProps {
   onLogin: (user: { id: number; email: string; firstName: string; lastName: string; roles: string[]; isActive: boolean }, token: string) => void;
 }
 
 export default function Login({ onLogin }: LoginProps) {
-  const [email, setEmail] = useState("admin@enterprise.com");
+  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL as string | undefined;
+  const [email, setEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [password, setPassword] = useState("Password123!");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [resetMode, setResetMode] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleAuth = async (mode: "manual" | "sso") => {
     setLoading(true);
@@ -44,13 +49,29 @@ export default function Login({ onLogin }: LoginProps) {
 
       onLogin(data.user, data.token);
     } catch (err) {
-      setError(err instanceof TypeError ? "Unable to reach the CloudOrbix server. Please check that the API is running." : err instanceof Error ? err.message : "Access Denied. Contact Application Administrator.");
+      const message = err instanceof TypeError ? "Unable to reach the CloudOrbix server. Please check that the API is running." : err instanceof Error ? err.message : "Access Denied. Contact Application Administrator.";
+      setError(message);
+      showCloudOrbixAlert(message, "error");
     } finally {
       setLoading(false);
     }
   };
 
   const handleSSO = () => handleAuth("sso");
+
+  const handlePasswordReset = async () => {
+    setError("");
+    if (newPassword !== confirmPassword) return setError("The new passwords do not match.");
+    try {
+      const response = await fetch("/api/auth/change-password", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("clmp-token") || ""}` }, body: JSON.stringify({ oldPassword: password, newPassword }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Unable to reset password.");
+      setError(data.message);
+      setResetMode(false);
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) { setError(err instanceof Error ? err.message : "Unable to reset password."); }
+  };
 
   const features = [
     { icon: Cloud, title: "Multi-Cloud Management", desc: "Azure, AWS, GCP lifecycle visibility" },
@@ -215,15 +236,19 @@ export default function Login({ onLogin }: LoginProps) {
             </div>
           </div>
 
+          {resetMode && <div className="space-y-3 mb-4">
+            <label className="block text-xs font-semibold text-slate-200">New password<input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Enter a new password" className="mt-1 w-full px-3 py-2 rounded-lg border text-sm bg-white text-slate-900 placeholder:text-slate-500" style={{ borderColor: "#94A3B8" }} /></label>
+            <label className="block text-xs font-semibold text-slate-200">Confirm new password<input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Re-enter the new password" className="mt-1 w-full px-3 py-2 rounded-lg border text-sm bg-white text-slate-900 placeholder:text-slate-500" style={{ borderColor: "#94A3B8" }} /></label>
+          </div>}
           <button
-            onClick={() => handleAuth("manual")}
+            onClick={() => resetMode ? handlePasswordReset() : handleAuth("manual")}
             disabled={loading}
             className="w-full py-3 rounded-lg font-semibold text-white text-sm transition-colors"
             style={{ background: loading ? "#93BFFF" : "#1E40AF" }}
             onMouseOver={e => ((e.target as HTMLElement).style.background = loading ? "#93BFFF" : "#1D3A9E")}
             onMouseOut={e => ((e.target as HTMLElement).style.background = loading ? "#93BFFF" : "#1E40AF")}
           >
-            Sign In
+            {resetMode ? "Update password" : "Sign In"}
           </button>
 
           <div className="mt-8 p-4 rounded-lg bg-slate-50 border border-slate-100">
@@ -231,9 +256,9 @@ export default function Login({ onLogin }: LoginProps) {
             <div className="flex justify-center gap-4 text-xs text-blue-600">
               <a href="#" className="hover:underline">IT Support</a>
               <span className="text-slate-300">|</span>
-              <a href="#" className="hover:underline">Reset Password</a>
+              <a href="#" onClick={e => { e.preventDefault(); setResetMode(true); setError("Enter your current password above, then choose a new password."); }} className="hover:underline">Reset Password</a>
               <span className="text-slate-300">|</span>
-              <a href="#" className="hover:underline">Contact Admin</a>
+              <a href={adminEmail ? `mailto:${adminEmail}?subject=CloudOrbix%20password%20reset` : "#"} onClick={event => { if (!adminEmail) { event.preventDefault(); setError("Administrator contact is not configured."); } }} className="hover:underline">Contact Admin</a>
             </div>
           </div>
 

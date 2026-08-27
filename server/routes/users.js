@@ -37,16 +37,16 @@ router.get('/', protectRoute, requireRole('Admin', 'Manager', 'Operations Team')
 router.post('/', protectRoute, requireRole('Admin'), async (req, res, next) => {
   const { firstName, lastName, email, role, isActive, password } = req.body || {};
   const normalizedEmail = String(email || '').trim().toLowerCase();
-  if (!normalizedEmail || !firstName || !lastName) return res.status(400).json({ message: 'First name, last name, and email are required.' });
+  if (!normalizedEmail || !firstName || !lastName || !password || String(password).length < 12) return res.status(400).json({ message: 'First name, last name, email, and a password of at least 12 characters are required.' });
   try {
     const pool = getPool();
     if (!pool) {
       if (appState.users.some((user) => user.email.toLowerCase() === normalizedEmail)) return res.status(409).json({ message: 'A user with this email already exists.' });
-      const user = { id: Date.now(), email: normalizedEmail, password: password || 'Password123!', firstName: String(firstName).trim(), lastName: String(lastName).trim(), isActive: isActive !== false, roles: [dbRole(role)] };
+      const user = { id: Date.now(), email: normalizedEmail, password, firstName: String(firstName).trim(), lastName: String(lastName).trim(), isActive: isActive !== false, roles: [dbRole(role)] };
       appState.users.push(user);
       return res.status(201).json({ user: publicUser(user) });
     }
-    const inserted = await pool.query(`INSERT INTO users (email,password_hash,first_name,last_name,is_active) VALUES ($1,$2,$3,$4,$5) RETURNING id`, [normalizedEmail, await hashPassword(password || 'Password123!'), String(firstName).trim(), String(lastName).trim(), isActive !== false]);
+    const inserted = await pool.query(`INSERT INTO users (email,password_hash,first_name,last_name,is_active) VALUES ($1,$2,$3,$4,$5) RETURNING id`, [normalizedEmail, await hashPassword(password), String(firstName).trim(), String(lastName).trim(), isActive !== false]);
     const userId = inserted.rows[0].id;
     const roleResult = await pool.query('SELECT id FROM roles WHERE name = $1', [dbRole(role)]);
     if (roleResult.rows[0]) await pool.query('INSERT INTO user_roles (user_id,role_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [userId, roleResult.rows[0].id]);

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Shield, Users, Settings, Plus, Edit2, Trash2, Check, X, Eye, EyeOff, ToggleLeft, ToggleRight } from "lucide-react";
+import { showCloudOrbixAlert } from "../alert";
 
 type UserStatus = "active" | "inactive";
-type TabKey = "users" | "roles" | "permissions";
+type TabKey = "users" | "roles" | "permissions" | "approvals";
 
 type UserRecord = {
   id: number;
@@ -23,6 +24,26 @@ type ApiUser = {
   isActive?: boolean;
 };
 
+type PendingClient = {
+  id: number;
+  clientId: string;
+  clientName: string;
+  accountManager?: string;
+  projectManager?: string;
+  currentStatus?: string;
+  approvalStatus?: string;
+  pendingCreate?: boolean;
+  pendingPayload?: Record<string, unknown> | null;
+};
+
+type ProjectReview = {
+  project?: Record<string, unknown>;
+  tasks?: unknown[];
+  documents?: unknown[];
+  updates?: unknown[];
+  risks?: unknown[];
+};
+
 type AdminProps = {
   dark: boolean;
   user?: {
@@ -35,15 +56,7 @@ type AdminProps = {
   };
 };
 
-const INITIAL_USERS: UserRecord[] = [
-  { id: 1, name: "Sarah Chen", email: "s.chen@enterprise.com", role: "Account Manager", status: "active", lastLogin: "2025-08-13 14:32" },
-  { id: 2, name: "James Rodriguez", email: "j.rodriguez@enterprise.com", role: "Account Manager", status: "active", lastLogin: "2025-08-13 11:05" },
-  { id: 3, name: "Priya Sharma", email: "p.sharma@enterprise.com", role: "Account Manager", status: "active", lastLogin: "2025-08-12 09:44" },
-  { id: 4, name: "Michael Park", email: "m.park@enterprise.com", role: "Manager", status: "active", lastLogin: "2025-08-11 16:55" },
-  { id: 5, name: "Lisa Wang", email: "l.wang@enterprise.com", role: "Account Manager", status: "active", lastLogin: "2025-08-11 11:20" },
-  { id: 6, name: "David Kumar", email: "d.kumar@enterprise.com", role: "Viewer", status: "inactive", lastLogin: "2025-07-30 08:00" },
-  { id: 7, name: "System Admin", email: "admin@enterprise.com", role: "Admin", status: "active", lastLogin: "2025-08-13 06:00" },
-];
+const INITIAL_USERS: UserRecord[] = [];
 
 const ROLES = [
   { name: "Admin", color: "#DC2626", bg: "#FEE2E2", users: 1, permissions: ["All access", "User management", "System config", "Audit access", "Export all data"] },
@@ -73,6 +86,9 @@ export default function Admin({ dark }: AdminProps) {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draft, setDraft] = useState<{ name: string; email: string; role: string; status: UserStatus; password: string }>({ name: "", email: "", role: "Account Manager", status: "active", password: "" });
   const [busy, setBusy] = useState(false);
+  const [pendingClients, setPendingClients] = useState<PendingClient[]>([]);
+  const [reviewClientId, setReviewClientId] = useState<string | null>(null);
+  const [reviewDetails, setReviewDetails] = useState<ProjectReview | null>(null);
 
   const bg = dark ? "#1E293B" : "#FFFFFF";
   const border = dark ? "#334155" : "#E2E8F0";
@@ -89,7 +105,7 @@ export default function Admin({ dark }: AdminProps) {
   };
 
   const roles = useMemo<string[]>(() => ["Admin", "Manager", "Account Manager", "Viewer"], []);
-  const tabs: TabKey[] = ["users", "roles", "permissions"];
+  const tabs: TabKey[] = ["users", "roles", "permissions", "approvals"];
 
   useEffect(() => {
     const token = localStorage.getItem("clmp-token");
@@ -117,6 +133,37 @@ export default function Admin({ dark }: AdminProps) {
         setUsers(INITIAL_USERS);
       });
   }, []);
+
+  useEffect(() => {
+    if (tab !== "approvals") return;
+    const token = localStorage.getItem("clmp-token");
+    fetch("/api/clients/approvals", { headers: { Authorization: `Bearer ${token}` } })
+      .then(response => response.ok ? response.json() : Promise.reject(new Error("Unable to load approvals")))
+      .then((payload: { clients?: PendingClient[] }) => setPendingClients(payload.clients || []))
+      .catch(() => setPendingClients([]));
+  }, [tab]);
+
+  const reviewClient = async (clientId: string, action: "approve" | "reject") => {
+    const token = localStorage.getItem("clmp-token");
+    const response = await fetch(`/api/clients/${clientId}/${action}`, { method: "POST", headers: { Authorization: `Bearer ${token}` } });
+    if (response.ok) setPendingClients(current => current.filter(client => client.clientId !== clientId));
+    else showCloudOrbixAlert(`Unable to ${action} client approval.`, "error");
+  };
+
+  const openClientReview = async (clientId: string) => {
+    const token = localStorage.getItem("clmp-token");
+    setReviewClientId(clientId);
+    setReviewDetails(null);
+    const response = await fetch(`/api/projects/${clientId}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (response.ok) setReviewDetails(await response.json());
+  };
+
+  const formatReviewValue = (value: unknown) => {
+    if (value === null || value === undefined || value === "") return "-";
+    if (Array.isArray(value)) return value.join(", ");
+    if (typeof value === "object") return JSON.stringify(value);
+    return String(value);
+  };
 
   const openAddUser = () => {
     setEditingId(null);
@@ -275,7 +322,7 @@ export default function Admin({ dark }: AdminProps) {
             className="px-5 py-2.5 text-xs font-semibold capitalize transition-colors border-b-2 -mb-px"
             style={{ borderColor: tab === item ? "#1E40AF" : "transparent", color: tab === item ? "#1E40AF" : muted }}
           >
-            {item === "users" ? "Users" : item === "roles" ? "Roles" : "Permissions"}
+            {item === "users" ? "Users" : item === "roles" ? "Roles" : item === "permissions" ? "Permissions" : "Approvals"}
           </button>
         ))}
       </div>
@@ -402,6 +449,86 @@ export default function Admin({ dark }: AdminProps) {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {tab === "approvals" && (
+        <div className="rounded-xl border overflow-hidden" style={{ background: bg, borderColor: border }}>
+          <div className="px-5 py-4 border-b" style={{ borderColor: border }}>
+            <h3 className="font-semibold text-sm">Pending client approvals ({pendingClients.length})</h3>
+            <p className="text-xs mt-1" style={{ color: muted }}>Review client additions, edits, and completion requests.</p>
+          </div>
+          {pendingClients.length ? pendingClients.map(client => (
+            <div key={client.id} className="px-5 py-4 border-b flex items-center justify-between gap-4" style={{ borderColor: border }}>
+              <div>
+                <div className="text-sm font-semibold">{client.clientName}</div>
+                <div className="text-xs" style={{ color: muted }}>{client.clientId} · {client.pendingCreate ? "New client" : "Client change"} · Requested status: {formatReviewValue(client.pendingPayload?.currentStatus || client.currentStatus)} · PM: {client.pendingPayload?.projectManager ? formatReviewValue(client.pendingPayload.projectManager) : client.projectManager || "Unassigned"}</div>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => void openClientReview(client.clientId)} className="px-3 py-2 rounded-lg text-xs font-semibold border" style={{ borderColor: border, color: text }}><Eye className="w-3.5 h-3.5 inline mr-1" />View details</button>
+                <button onClick={() => void reviewClient(client.clientId, "reject")} className="px-3 py-2 rounded-lg text-xs font-semibold border text-red-600" style={{ borderColor: "#FECACA" }}><X className="w-3.5 h-3.5 inline mr-1" />Reject</button>
+                <button onClick={() => void reviewClient(client.clientId, "approve")} className="px-3 py-2 rounded-lg text-xs font-semibold text-white" style={{ background: "#16A34A" }}><Check className="w-3.5 h-3.5 inline mr-1" />Approve</button>
+              </div>
+            </div>
+          )) : <p className="p-5 text-xs" style={{ color: muted }}>No pending approvals.</p>}
+        </div>
+      )}
+
+      {reviewClientId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm p-4">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border p-5 shadow-2xl" style={{ background: bg, borderColor: border }}>
+            {(() => {
+              const pending = pendingClients.find(client => client.clientId === reviewClientId);
+              const requested = pending?.pendingPayload || {};
+              const project = reviewDetails?.project || {};
+              const current = {
+                clientName: project.client_name || pending?.clientName,
+                accountManager: project.account_manager || pending?.accountManager,
+                projectManager: project.project_manager || pending?.projectManager,
+                currentStatus: project.current_status || pending?.currentStatus,
+                region: project.region,
+                industry: project.industry,
+                revenue: project.revenue,
+                hyperscaler: project.hyperscaler,
+                projectType: project.project_type,
+                projectBrief: project.project_brief,
+                isow: project.isow,
+                estimatedStartDate: project.estimated_start_date,
+                estimatedEndDate: project.estimated_end_date,
+                actualStartDate: project.actual_start_date,
+                actualEndDate: project.actual_end_date,
+                completion: project.completion,
+                remarks: project.remarks,
+              };
+              const fields = [
+                ["Client name", "clientName"], ["Account manager", "accountManager"], ["Project managers", "projectManager"],
+                ["Project status", "currentStatus"], ["Region", "region"], ["Industry", "industry"], ["Revenue", "revenue"],
+                ["Hyperscaler", "hyperscaler"], ["Project type", "projectType"], ["Project brief", "projectBrief"], ["ISOW", "isow"],
+                ["Estimated start", "estimatedStartDate"], ["Estimated end", "estimatedEndDate"], ["Actual start", "actualStartDate"], ["Actual end", "actualEndDate"],
+                ["Completion", "completion"], ["Remarks", "remarks"],
+              ] as const;
+              return (
+                <>
+                  <div className="flex items-center justify-between mb-4">
+                    <div><h3 className="text-base font-semibold">Review {pending?.pendingCreate ? "new client" : "client change"}</h3><p className="text-xs mt-1" style={{ color: muted }}>{reviewClientId} · Compare requested values before approving</p></div>
+                    <button onClick={() => setReviewClientId(null)} className="p-1.5 rounded-md" style={{ color: muted }} title="Close review"><X className="w-4 h-4" /></button>
+                  </div>
+                  <div className="grid grid-cols-[1fr_1fr_1fr] gap-2 text-xs">
+                    <div className="font-semibold">Field</div><div className="font-semibold" style={{ color: muted }}>Current approved</div><div className="font-semibold" style={{ color: "#1E40AF" }}>Requested</div>
+                    {fields.map(([label, key]) => <div key={key} className="contents"><div className="border-t py-2" style={{ borderColor: border }}>{label}</div><div className="border-t py-2" style={{ borderColor: border }}>{formatReviewValue(current[key])}</div><div className="border-t py-2 font-semibold" style={{ borderColor: border, color: formatReviewValue(current[key]) !== formatReviewValue(requested[key]) ? "#D97706" : text }}>{formatReviewValue(requested[key])}</div></div>)}
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
+                    {[['Documents', reviewDetails?.documents?.length], ['Tasks', reviewDetails?.tasks?.length], ['Daily updates', reviewDetails?.updates?.length], ['Risks', reviewDetails?.risks?.length]].map(([label, count]) => <div key={String(label)} className="rounded-lg border p-3" style={{ borderColor: border }}><div className="text-lg font-bold">{count ?? "-"}</div><div className="text-[10px]" style={{ color: muted }}>{label}</div></div>)}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-xs">
+                    <div><div className="font-semibold mb-2">Uploaded documents</div>{reviewDetails?.documents?.length ? reviewDetails.documents.map((document: any) => <div key={document.id} className="border-t py-1.5" style={{ borderColor: border }}>{document.file_name || "Unnamed document"}</div>) : <div style={{ color: muted }}>No documents uploaded.</div>}</div>
+                    <div><div className="font-semibold mb-2">Recent project activity</div>{reviewDetails?.updates?.length ? reviewDetails.updates.slice(0, 5).map((update: any) => <div key={update.id} className="border-t py-1.5" style={{ borderColor: border }}>{update.update_text} <span style={{ color: muted }}>({update.updated_by})</span></div>) : <div style={{ color: muted }}>No daily updates recorded.</div>}</div>
+                  </div>
+                  <div className="flex justify-end gap-2 mt-5"><button onClick={() => { void reviewClient(reviewClientId, "reject"); setReviewClientId(null); }} className="px-3 py-2 rounded-lg text-xs font-semibold border text-red-600" style={{ borderColor: "#FECACA" }}>Reject</button><button onClick={() => { void reviewClient(reviewClientId, "approve"); setReviewClientId(null); }} className="px-3 py-2 rounded-lg text-xs font-semibold text-white" style={{ background: "#16A34A" }}>Approve</button></div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}

@@ -1,23 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Users, UserCheck, Clock, UserMinus, Cloud, TrendingUp, DollarSign, BarChart2, RefreshCw, ArrowUpRight, ArrowDownRight,
-  CalendarDays, AlertCircle
+  CalendarDays, AlertCircle, FolderKanban, CheckCircle2, AlertTriangle, ShieldAlert
 } from "lucide-react";
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis,
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
 import { KPICard, KPIRadialCard, KPISparklineCard } from "./KPI";
 
 interface DashboardProps { dark: boolean; onNavigate: (p: string) => void; user?: { roles: string[] }; }
-
-const ACTIVITY_FEED = [
-  { action: "Vortex Capital status updated to Offboarding Scheduled", user: "Sarah Chen", time: "2h ago", type: "update" },
-  { action: "Excel import batch #112 completed — 14 records imported", user: "System", time: "4h ago", type: "import" },
-  { action: "New client Cascade Energy onboarded successfully", user: "James Rodriguez", time: "1d ago", type: "create" },
-  { action: "Q2 Revenue Report exported to PDF", user: "Priya Sharma", time: "1d ago", type: "export" },
-  { action: "BrightPath Education added as Pending Onboarding", user: "Priya Sharma", time: "2d ago", type: "create" },
-];
 
 const typeColor: Record<string, string> = {
   update: "#D97706", import: "#1E40AF", create: "#16A34A", export: "#7C3AED",
@@ -40,7 +32,7 @@ const CustomTooltip = ({ active, payload, label, dark }: any) => {
 
 export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
   const [chartPeriod, setChartPeriod] = useState("Monthly");
-  const [summary, setSummary] = useState({ totalClients: 0, activeClients: 0, pendingOnboarding: 0, offboardingScheduled: 0, offboardedClients: 0, azureClients: 0, awsClients: 0, monthlyRevenue: 0, annualRevenue: 0, netClientGrowth: 0 });
+  const [summary, setSummary] = useState({ totalClients: 0, activeClients: 0, totalRevenue: 0, averageRevenue: 0, activeProjects: 0, completedProjects: 0, delayedProjects: 0, openRisks: 0, highRisks: 0, averageCompletion: 0 });
   const [chartData, setChartData] = useState<any[]>([]);
   const [revenueSeries, setRevenueSeries] = useState<any[]>([]);
   const [serviceSeries, setServiceSeries] = useState<any[]>([]);
@@ -53,26 +45,31 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
     const token = localStorage.getItem("clmp-token");
     if (!token) return;
 
-    fetch('/api/dashboard', {
+    fetch(`/api/dashboard?period=${encodeURIComponent(chartPeriod)}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((response) => response.ok ? response.json() : null)
       .then((payload) => {
         if (!payload) return;
         setSummary((current) => ({ ...current, ...payload.summary }));
-        if (payload.onboardingTrend?.length) setChartData(payload.onboardingTrend);
-        if (payload.revenueTrend?.length) setRevenueSeries(payload.revenueTrend);
-        if (payload.serviceAdoption?.length) setServiceSeries(payload.serviceAdoption);
-        if (payload.regionData?.length) setRegionSeries(payload.regionData);
+        setChartData((payload.onboardingTrend?.length ? payload.onboardingTrend : [{ month: "No data", onboarded: 0, offboarded: 0 }]).map((item: any) => ({ ...item, offboarded: item.offboarded || 0 })));
+        setRevenueSeries(payload.revenueTrend?.length ? payload.revenueTrend : [{ month: "No data", revenue: 0 }]);
+        setServiceSeries(payload.serviceAdoption || []);
+        setRegionSeries(payload.regionData?.length ? payload.regionData : [{ region: "No data", clients: 0, revenue: 0, color: "#CBD5E1" }]);
         setUpcoming(payload.upcomingActivities || []);
       })
-      .catch(() => undefined);
-    fetch('/api/audit', { headers: { Authorization: `Bearer ${token}` } }).then((response) => response.ok ? response.json() : null).then((payload) => setActivityFeed((payload?.logs || []).slice(0, 5).map((entry: any) => ({ action: entry.action, user: entry.user, time: entry.timestamp, type: entry.type?.toLowerCase() || 'update' })))).catch(() => undefined);
+      .catch(() => {
+        setChartData([{ month: chartPeriod, onboarded: summary.totalClients, offboarded: 0 }]);
+        setRevenueSeries([{ month: chartPeriod, revenue: summary.totalRevenue / 1000000 }]);
+        setRegionSeries([{ region: "Current clients", clients: summary.totalClients, revenue: summary.totalRevenue / 1000000, color: "#1E40AF" }]);
+      });
+    if (user?.roles.includes("Admin")) fetch('/api/audit', { headers: { Authorization: `Bearer ${token}` } }).then((response) => response.ok ? response.json() : null).then((payload) => setActivityFeed((payload?.logs || []).slice(0, 5).map((entry: any) => ({ action: entry.action, user: entry.user, time: entry.timestamp, type: entry.type?.toLowerCase() || 'update' })))).catch(() => undefined);
   };
 
-  useEffect(() => { loadDashboard(); }, []);
+  useEffect(() => { loadDashboard(); }, [chartPeriod, user]);
 
-  const kpiCards = useMemo(() => [
+  /* Legacy KPI definitions retained temporarily for reference while the dashboard uses live KPIs.
+  const legacyKpiCards = useMemo(() => [
     {
       title: "Total Clients",
       value: String(summary.totalClients),
@@ -86,7 +83,7 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
       data: Array.from({ length: 8 }, (_, index) => ({ label: `W${index + 1}`, value: summary.totalClients - 3 + index * 2 })),
     },
     {
-      title: "Active Clients",
+      title: " Projects On-Track",
       value: String(summary.activeClients),
       change: "+5.1%",
       trend: "up" as const,
@@ -179,6 +176,19 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
         { label: "Q1", value: 20 }, { label: "Q2", value: 22 }, { label: "Q3", value: 24 }, { label: "Q4", value: 29 },
       ],
     },
+  ], [summary]); */
+
+  const kpiCards = useMemo(() => [
+    { title: "Total Clients", value: String(summary.totalClients), subtitle: "Approved client records", accent: "#1E40AF", icon: Users },
+    { title: "Active Clients (On Track)", value: String(summary.activeClients), subtitle: "On-track, in-progress, or onboarded", accent: "#16A34A", icon: UserCheck },
+    { title: "Total Revenue", value: `$${(summary.totalRevenue / 1000000).toFixed(2)}M`, subtitle: "Approved clients only", accent: "#0F766E", icon: Users },
+    { title: "Average Revenue Per Client", value: `$${summary.averageRevenue.toLocaleString()}`, subtitle: "Approved clients only", accent: "#0F766E", icon: Users },
+    { title: "Active Projects", value: String(summary.activeProjects), subtitle: "Approved projects", accent: "#1E40AF", icon: FolderKanban },
+    { title: "Completed Projects", value: String(summary.completedProjects), subtitle: "Completed status or 100%", accent: "#16A34A", icon: CheckCircle2 },
+    { title: "Delayed Projects", value: String(summary.delayedProjects), subtitle: "Delayed, blocked, or past due", accent: "#DC2626", icon: AlertTriangle },
+    { title: "Open Risks", value: String(summary.openRisks), subtitle: "Open project risks", accent: "#D97706", icon: AlertTriangle },
+    { title: "High Risks", value: String(summary.highRisks), subtitle: "Open high-level risks", accent: "#DC2626", icon: ShieldAlert },
+    { title: "Average Project Completion %", value: `${summary.averageCompletion.toFixed(1)}%`, subtitle: "Average across approved projects", accent: "#2563EB", icon: CheckCircle2 },
   ], [summary]);
 
   const bg = dark ? "#1E293B" : "#FFFFFF";
@@ -218,19 +228,14 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
           const commonProps = {
             title: card.title,
             value: card.value,
-            change: card.change,
-            trend: card.trend,
-            lastUpdated: card.lastUpdated,
+            change: "Live",
+            trend: "neutral" as const,
+            lastUpdated: "now",
             accent: card.accent,
             icon: card.icon,
             subtitle: card.subtitle,
           };
-
-          if (card.type === "radial") {
-            return <KPIRadialCard key={card.title} {...commonProps} percent={card.percent ?? 0} />;
-          }
-
-          return <KPISparklineCard key={card.title} {...commonProps} data={card.data ?? []} area={card.title.includes("Revenue") || card.title.includes("Clients")} />;
+          return <KPICard key={card.title} {...commonProps} />;
         })}
       </div>
 
@@ -242,8 +247,8 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
               <p className="text-xs mt-0.5" style={{ color: muted }}>Monthly, FY 2025</p>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={chartData} barGap={4}>
+          <ResponsiveContainer width="100%" height={220} minWidth={0}>
+            <BarChart data={chartData} barGap={4} margin={{ top: 8, right: 8, bottom: 8, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={dark ? "#334155" : "#F1F5F9"} />
               <XAxis dataKey="month" tick={{ fontSize: 11, fill: muted }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: muted }} axisLine={false} tickLine={false} />
@@ -254,7 +259,6 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
             </BarChart>
           </ResponsiveContainer>
         </div>
-
         <div className="rounded-xl border p-5" style={{ background: bg, borderColor: border }}>
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -265,8 +269,8 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
               <ArrowUpRight className="w-3 h-3" /> +17.3% YoY
             </span>
           </div>
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={revenueSeries}>
+          <ResponsiveContainer width="100%" height={220} minWidth={0}>
+            <AreaChart data={revenueSeries} margin={{ top: 8, right: 8, bottom: 8, left: 0 }}>
               <defs>
                 <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#1E40AF" stopOpacity={0.2} />
@@ -284,7 +288,7 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="rounded-xl border p-5" style={{ background: bg, borderColor: border }}>
+        {user?.roles.includes("Admin") && <div className="rounded-xl border p-5" style={{ background: bg, borderColor: border }}>
           <h3 className="font-semibold text-sm mb-4">Service Adoption</h3>
           <div className="space-y-3">
             {serviceSeries.map((service) => (
@@ -294,12 +298,12 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
                   <span style={{ color: muted }}>{service.clients} clients</span>
                 </div>
                 <div className="h-2 rounded-full" style={{ background: dark ? "#334155" : "#F1F5F9" }}>
-                  <div className="h-2 rounded-full transition-all" style={{ background: "#1E40AF", width: `${(service.clients / 42) * 100}%` }} />
+                  <div className="h-2 rounded-full transition-all" style={{ background: "#1E40AF", width: `${summary.totalClients > 0 ? (service.clients / summary.totalClients) * 100 : 0}%` }} />
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </div>}
 
         <div className="rounded-xl border p-5" style={{ background: bg, borderColor: border }}>
           <h3 className="font-semibold text-sm mb-4">Recent Activity</h3>
@@ -361,6 +365,16 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
               <div className="text-[10px]" style={{ color: muted }}>${region.revenue}M</div>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="rounded-xl border p-5" style={{ background: bg, borderColor: border }}>
+        <h3 className="font-semibold text-sm mb-4">Client Status Distribution</h3>
+        <div className="flex items-center gap-6">
+          <ResponsiveContainer width="45%" height={180} minWidth={120}>
+            <PieChart><Pie data={regionSeries} dataKey="clients" nameKey="region" cx="50%" cy="50%" outerRadius={70} innerRadius={38} labelLine={false}>{regionSeries.map((entry, index) => <Cell key={entry.region} fill={entry.color || ["#1E40AF", "#16A34A", "#D97706", "#DC2626"][index % 4]} />)}</Pie><Tooltip content={<CustomTooltip dark={dark} />} /></PieChart>
+          </ResponsiveContainer>
+          <div className="space-y-2 text-xs">{regionSeries.slice(0, 6).map((region) => <div key={region.region} className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full" style={{ background: region.color }} /><span>{region.region}</span><strong>{region.clients}</strong></div>)}</div>
         </div>
       </div>
     </div>

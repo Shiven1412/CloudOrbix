@@ -1,16 +1,18 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import Login from "./components/Login";
 import Shell, { type Page } from "./components/Shell";
-import Dashboard from "./components/Dashboard";
-import Clients from "./components/Clients";
-import Analytics from "./components/Analytics";
-import ExcelImport from "./components/ExcelImport";
-import Reports from "./components/Reports";
-import AuditLogs from "./components/AuditLogs";
-import Admin from "./components/Admin";
-import SimplePage from "./components/SimplePage";
 import LoadingScreen from "./components/LoadingScreen";
-import ProjectPage from "./components/ProjectPage";
+
+const Dashboard = lazy(() => import("./components/Dashboard"));
+const Clients = lazy(() => import("./components/Clients"));
+const ExcelImport = lazy(() => import("./components/ExcelImport"));
+const Reports = lazy(() => import("./components/Reports"));
+const AuditLogs = lazy(() => import("./components/AuditLogs"));
+const Admin = lazy(() => import("./components/Admin"));
+const SimplePage = lazy(() => import("./components/SimplePage"));
+const ProjectPage = lazy(() => import("./components/ProjectPage"));
+const DocumentsPage = lazy(() => import("./components/DocumentsPage"));
+const ProjectRepository = lazy(() => import("./components/ProjectRepository"));
 
 type AuthUser = {
   id: number;
@@ -30,13 +32,20 @@ const getStoredUser = (): AuthUser | null => {
   }
 };
 
+const getInitialPage = (): Page => {
+  const hash = window.location.hash.replace(/^#/, "") as Page;
+  const validPages: Page[] = ["dashboard", "clients", "reports", "excel", "audit", "admin", "help", "project", "documents", "repository"];
+  return validPages.includes(hash) ? hash : "dashboard";
+};
+
 export default function App() {
   const [booting, setBooting] = useState(true);
   const [loggedIn, setLoggedIn] = useState(Boolean(localStorage.getItem("clmp-token")));
-  const [page, setPage] = useState<Page>("dashboard");
+  const [page, setPage] = useState<Page>(getInitialPage);
   const [dark, setDark] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(getStoredUser());
-  const [projectId, setProjectId] = useState<string | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(() => localStorage.getItem("clmp-project-id"));
+  const [repositoryDocuments, setRepositoryDocuments] = useState(() => localStorage.getItem("clmp-repository-documents") === "true");
   const [globalSearch, setGlobalSearch] = useState("");
 
   useEffect(() => {
@@ -46,7 +55,7 @@ export default function App() {
 
   useEffect(() => {
     const onPopState = (event: PopStateEvent) => {
-      const nextPage = event.state?.page as Page | undefined;
+      const nextPage = (event.state?.page || window.location.hash.replace(/^#/, "")) as Page | undefined;
       if (nextPage) setPage(nextPage);
       else setPage("dashboard");
     };
@@ -57,6 +66,15 @@ export default function App() {
   const navigateTo = (nextPage: Page) => {
     setPage(nextPage);
     window.history.pushState({ page: nextPage }, "", nextPage === "dashboard" ? "/" : `#${nextPage}`);
+  };
+
+  const openProject = (id: string, destination: Page = "project") => {
+    setProjectId(id);
+    localStorage.setItem("clmp-project-id", id);
+    const readOnly = destination === "documents";
+    setRepositoryDocuments(readOnly);
+    localStorage.setItem("clmp-repository-documents", String(readOnly));
+    navigateTo(destination);
   };
 
   const handleGlobalSearch = (query: string) => {
@@ -85,6 +103,10 @@ export default function App() {
   const handleLogout = () => {
     localStorage.removeItem("clmp-token");
     localStorage.removeItem("clmp-user");
+    localStorage.removeItem("clmp-project-id");
+    localStorage.removeItem("clmp-repository-documents");
+    setPage("dashboard");
+    window.history.replaceState({ page: "dashboard" }, "", "/");
     setLoggedIn(false);
     setUser(null);
   };
@@ -100,16 +122,14 @@ export default function App() {
   const renderPage = () => {
     switch (page) {
       case "dashboard":   return <Dashboard dark={dark} onNavigate={p => navigateTo(p as Page)} user={user} />;
-      case "clients":     return <Clients dark={dark} user={user} initialSearch={globalSearch} onOpenProject={(id) => { setProjectId(id); navigateTo("project"); }} />;
-      case "project":     return projectId ? <ProjectPage dark={dark} clientId={projectId} onBack={() => navigateTo("clients")} /> : <Clients dark={dark} user={user} initialSearch={globalSearch} onOpenProject={(id) => { setProjectId(id); navigateTo("project"); }} />;
-      case "analytics":   return <Analytics dark={dark} />;
-      case "excel":       return <ExcelImport dark={dark} />;
+      case "clients":     return <Clients dark={dark} user={user} initialSearch={globalSearch} onOpenProject={(id) => openProject(id)} />;
+      case "project":     return projectId ? <ProjectPage dark={dark} clientId={projectId} user={user} onBack={() => navigateTo("clients")} onOpenDocuments={() => navigateTo("documents")} /> : <Clients dark={dark} user={user} initialSearch={globalSearch} onOpenProject={(id) => openProject(id)} />;
+      case "documents":  return projectId ? <DocumentsPage dark={dark} clientId={projectId} readOnly={repositoryDocuments} onBack={() => navigateTo(repositoryDocuments ? "repository" : "project")} /> : <Clients dark={dark} user={user} initialSearch={globalSearch} onOpenProject={(id) => openProject(id)} />;
+        case "repository": return <ProjectRepository dark={dark} onOpenProject={(id) => openProject(id, "documents")} />;
+      case "excel":       return user.roles.includes("Admin") ? <ExcelImport dark={dark} /> : <Dashboard dark={dark} onNavigate={p => navigateTo(p as Page)} user={user} />;
       case "reports":     return <Reports dark={dark} />;
-      case "audit":       return <AuditLogs dark={dark} />;
-      case "admin":       return <Admin dark={dark} user={user} />;
-      case "onboarding":
-      case "offboarding":
-      case "services":
+      case "audit":       return user.roles.includes("Admin") ? <AuditLogs dark={dark} /> : <Dashboard dark={dark} onNavigate={p => navigateTo(p as Page)} user={user} />;
+      case "admin":       return user.roles.includes("Admin") ? <Admin dark={dark} user={user} /> : <Dashboard dark={dark} onNavigate={p => navigateTo(p as Page)} user={user} />;
       case "help":        return <SimplePage page={page} dark={dark} />;
       default:            return <Dashboard dark={dark} onNavigate={p => setPage(p as Page)} user={user} />;
     }
@@ -118,14 +138,14 @@ export default function App() {
   return (
     <Shell
       page={page}
-      onPageChange={setPage}
+      onPageChange={navigateTo}
       onLogout={handleLogout}
       dark={dark}
       user={user}
       onToggleDark={() => setDark(d => !d)}
       onSearch={handleGlobalSearch}
     >
-      {renderPage()}
+      <Suspense fallback={<LoadingScreen />}>{renderPage()}</Suspense>
     </Shell>
   );
 }

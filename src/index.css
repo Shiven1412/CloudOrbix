@@ -77,6 +77,24 @@ body {
   font-size: 13px;
 }
 
+.risk-register { display: none; }
+
+.project-page > .risk-form-primary {
+  order: 5;
+}
+
+.project-page > .risk-details {
+  order: 6;
+}
+
+.project-page > .risk-register > .mt-5 {
+  display: none;
+}
+
+.risk-register label:has(input[type="file"]) {
+  display: none;
+}
+
 @keyframes scrollAlerts {
   0% {
     transform: translateY(100%);

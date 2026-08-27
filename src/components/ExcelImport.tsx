@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Upload, FileSpreadsheet, CheckCircle2, XCircle, AlertTriangle, Download, RefreshCw, Eye, Trash2, ChevronRight } from "lucide-react";
+import { showCloudOrbixAlert } from "../alert";
 
 interface ExcelImportProps { dark: boolean; }
 
@@ -57,6 +58,7 @@ export default function ExcelImport({ dark }: ExcelImportProps) {
       setStage("preview");
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : "Import failed.");
+      showCloudOrbixAlert(uploadError instanceof Error ? uploadError.message : "Import failed.", "error");
     } finally { setUploading(false); }
   };
 

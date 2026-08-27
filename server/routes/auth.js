@@ -1,5 +1,5 @@
 import express from 'express';
-import { getUserByEmail, createAuditEntry, verifyPassword } from '../db.js';
+import { getUserByEmail, createAuditEntry, verifyPassword, updateUserPassword } from '../db.js';
 import { generateToken, protectRoute } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -75,6 +75,19 @@ router.post('/sso', async (req, res) => {
 
 router.get('/me', protectRoute, (req, res) => {
   return res.json({ user: req.user });
+});
+
+router.post('/change-password', protectRoute, async (req, res) => {
+  const { email, oldPassword, newPassword } = req.body || {};
+  if (!oldPassword || !newPassword || String(newPassword).length < 8) {
+    return res.status(400).json({ message: 'Old password and a new password of at least 8 characters are required.' });
+  }
+  const user = await getUserByEmail(req.user.email);
+  const valid = user?.password?.startsWith('$2') ? await verifyPassword(oldPassword, user.password) : String(user?.password) === String(oldPassword);
+  if (!valid) return res.status(403).json({ message: 'The old password is incorrect.' });
+  await updateUserPassword(req.user.id, newPassword);
+  createAuditEntry(user.email, 'Password Changed', null, 'Password updated by user');
+  return res.json({ message: 'Password updated successfully.' });
 });
 
 export default router;

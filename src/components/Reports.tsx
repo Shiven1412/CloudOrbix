@@ -4,11 +4,12 @@ import { Download, FileText, Calendar, Clock, CheckCircle2, BarChart3, Users, Do
 interface ReportsProps { dark: boolean; }
 
 const REPORT_TYPES = [
-  { id: "client-lifecycle", name: "Client Lifecycle Report", desc: "Full onboarding to offboarding journey", icon: Users, color: "#1E40AF", bg: "#DBEAFE" },
-  { id: "revenue", name: "Revenue Report", desc: "Revenue by client, service, and region", icon: DollarSign, color: "#7C3AED", bg: "#EDE9FE" },
-  { id: "service-adoption", name: "Service Adoption Report", desc: "Service uptake trends and penetration", icon: Server, color: "#16A34A", bg: "#DCFCE7" },
-  { id: "executive-kpi", name: "Executive KPI Summary", desc: "Leadership-ready KPI dashboard export", icon: BarChart3, color: "#D97706", bg: "#FEF3C7" },
-];
+  ["executive-kpi", "Executive KPI Dashboard"], ["project-manager-performance", "Project Manager Performance Report"], ["account-manager-performance", "Account Manager Performance Report"],
+  ["revenue", "Revenue Report"], ["client-lifecycle", "Client Lifecycle Report"], ["project-delivery", "Project Delivery Report"], ["service-adoption", "Service Adoption Report"],
+  ["risk-management", "Risk Management Report"], ["task-management", "Task Management Report"], ["regional-performance", "Regional Performance Report"], ["industry-analysis", "Industry Analysis Report"],
+  ["hyperscaler-adoption", "Hyperscaler Adoption Report"], ["status-distribution", "Status Distribution Report"], ["audit-activity", "Audit Activity Report"], ["excel-import", "Excel Import Report"],
+  ["project-updates", "Project Updates Report"], ["document-repository", "Document Repository Report"],
+].map(([id, name], index) => ({ id, name, desc: "Live data export with report metrics", icon: index % 3 === 0 ? BarChart3 : index % 3 === 1 ? Users : Server, color: ["#1E40AF", "#0F766E", "#D97706"][index % 3], bg: ["#DBEAFE", "#CCFBF1", "#FEF3C7"][index % 3] }));
 
 const RECENT_REPORTS = [
   { name: "Q2 2025 Revenue Report", type: "Revenue", generated: "Aug 1, 2025", format: "PDF", size: "2.4 MB", status: "ready" },
@@ -37,9 +38,22 @@ export default function Reports({ dark }: ReportsProps) {
   const muted = dark ? "#94A3B8" : "#64748B";
   const subtle = dark ? "#0F172A" : "#F8FAFC";
 
-  const generate = (id: string) => {
+  const generate = async (id: string) => {
     setGenerating(id);
-    setTimeout(() => setGenerating(null), 2000);
+    try {
+      const token = localStorage.getItem("clmp-token");
+      const response = await fetch(`/api/reports/export?type=${encodeURIComponent(id)}&format=${format.toLowerCase()}&from=${dateFrom}&to=${dateTo}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!response.ok) throw new Error((await response.json()).message || "Report generation failed.");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `cloudorbix-${id}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : "Report generation failed.");
+    } finally { setGenerating(null); }
   };
 
   return (
