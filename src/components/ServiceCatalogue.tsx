@@ -12,87 +12,90 @@ export interface Service {
 export const DEFAULT_SERVICES: Service[] = [
   {
     index: "01",
-    title: "Software Development",
-    tagline: "Built to last, built to scale",
-    creating: "Creating reliable, scalable software products that teams are proud to ship and users are happy to return to — from first commit to production and beyond.",
+    title: "Architecture, Design & Build",
+    tagline: "Turning business ambition into scalable technology foundations.",
+    creating: "We define target-state architectures and engineer secure, resilient platforms that support modernization and growth. Our services span enterprise and solution architecture, platform engineering, cloud design, integration patterns, and production-ready implementation.", 
     capabilities: [
-      "Full-stack web and mobile application engineering",
-      "API design, integration, and microservices architecture",
-      "CI/CD pipeline setup and DevOps automation",
-      "Code audits, legacy modernisation, and technical debt reduction",
-      "Ongoing maintenance, performance tuning, and feature delivery",
+      "Enterprise and solution architecture",
+      "Cloud and platform engineering",
+      "High-level and low-level design",
+      "Solution build and implementation",
+      "Security, resilience, and scalability by design",
     ],
-    image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=900&h=600&fit=crop&auto=format",
+    image: "/portfolio/1.png",
   },
   {
     index: "02",
     title: "Consultancy & Transformation",
-    tagline: "Clarity before commitment",
-    creating: "Creating the conditions for lasting digital change — helping organisations cut through complexity, align technology with business goals, and move from reactive IT to strategic advantage.",
+    tagline: "Creating a pragmatic path from current state to future state.",
+    creating: "We help organizations shape transformation strategies, establish governance, modernize technology estates, and implement effective operating models. Our approach aligns technology investments with measurable business priorities and delivery outcomes.",
     capabilities: [
-      "Digital transformation strategy and execution roadmaps",
-      "Technology landscape assessments and architecture reviews",
-      "Vendor evaluation, selection, and contract negotiation",
-      "Operating model design and IT governance frameworks",
-      "CTO advisory and embedded fractional leadership",
+      "Technology strategy and roadmaps",
+      "Cloud and application modernization",
+      "Governance, risk, and compliance",
+      "Target operating model design",
+      "Transformation planning and execution",
     ],
-    image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=900&h=600&fit=crop&auto=format",
+    image: "/portfolio/2.png",
   },
   {
     index: "03",
-    title: "Cloud & Infrastructure",
-    tagline: "Reliable at any altitude",
-    creating: "Creating infrastructure that scales without friction — cloud environments engineered for resilience, security, and cost efficiency from day one.",
+    title: "DevOps, Automation & Operations",
+    tagline: "Accelerating delivery while improving reliability and operational control.",
+    creating: "We establish modern engineering practices that connect development, security, operations, and platform teams. Through DevSecOps, intelligent automation, SRE, observability, and AIOps, we help organizations deliver changes faster and operate services more reliably.",
     capabilities: [
-      "Cloud architecture design and migration (AWS, Azure, GCP)",
-      "Kubernetes orchestration and container platform management",
-      "Infrastructure-as-Code with Terraform and Pulumi",
-      "Cost optimisation, FinOps, and resource governance",
-      "24/7 monitoring, incident management, and SRE practices",
-    ],
-    image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=900&h=600&fit=crop&auto=format",
+          "CI/CD and DevSecOps enablement",
+    "Infrastructure and configuration automation",
+    "Site Reliability Engineering (SRE)",
+    "Monitoring, observability, and AIOps",
+    "Operational process automation"  ,
+  ],
+    image: "/portfolio/3.png",
   },
   {
     index: "04",
-    title: "Cybersecurity",
-    tagline: "Defence without compromise",
-    creating: "Creating security postures that protect without slowing teams down — threat-led, compliance-aware, and built to withstand real-world attack vectors.",
+    title: "Lifecycle Management",
+    tagline: "Keeping technology secure, supported, optimzed and ready for change.",
+    creating: "We manage technology assets and platforms throughout the complete lifecycle, from onboarding and continuous optimization to refresh, modernization, and retirement. Structured governance helps reduce technical debt, operational risk, and unsupported technology exposure.",
     capabilities: [
-      "Penetration testing, red team exercises, and vulnerability assessments",
-      "Security Operations Centre (SOC) setup and managed detection",
-      "ISO 27001, SOC 2, and GDPR compliance programmes",
-      "Zero Trust network architecture and identity management",
-      "Incident response planning, tabletop exercises, and forensics",
+      "Technology lifecycle governance",
+      "Capacity, performance, and cost optimization",
+      "Patch, upgrade, and refresh planning",
+      "Modernization and technical debt reduction",
+      "End-of-life and decommissioning management",
     ],
-    image: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=900&h=600&fit=crop&auto=format",
+    image: "/portfolio/4.png",
   },
   {
     index: "05",
-    title: "Data & Analytics",
-    tagline: "Decisions backed by evidence",
-    creating: "Creating data ecosystems that turn raw events into reliable business intelligence — pipelines that run, dashboards that get used, and insights that actually change decisions.",
-    capabilities: [
-      "Data warehouse and lakehouse architecture (Snowflake, BigQuery, Databricks)",
-      "ETL/ELT pipeline engineering with dbt, Airflow, and Fivetran",
-      "BI dashboard design and self-serve analytics enablement",
-      "Data governance, cataloguing, and quality frameworks",
-      "ML model development, deployment, and monitoring in production",
+    title: "Operation Enablement",
+    tagline: "Building resilient, automated, and efficient operations that keep business-critical services running at scale.",
+    creating: "We enable organizations to modernize and optimize IT operations through automation, observability, reliability engineering, intelligent monitoring, and operational governance. Our Operations Enablement services help reduce downtime, improve service reliability, accelerate incident resolution, strengthen security posture, and drive continuous operational improvement across hybrid and multi-cloud environments." , 
+    capabilities: [ 
+      "Cloud operations setup and operating model design",
+"Site Reliability Engineering (SRE) enablement",
+"AIOps and intelligent operations automation",
+"Monitoring, observability, and alerting platforms",
+"Patch management and infrastructure automation",
+"Backup, disaster recovery, and business continuity operations",
+"Security operations and SOC enablement" , 
+
     ],
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=900&h=600&fit=crop&auto=format",
+    image: "/portfolio/5.png",
   },
   {
     index: "06",
-    title: "AI & Automation",
-    tagline: "Leverage intelligence, reduce friction",
-    creating: "Creating AI-powered systems that handle the repetitive, surface the important, and free teams to focus on work that genuinely requires human judgement.",
+    title: "Technology Capabilities",
+    tagline: "Providing the specialist expertise that powers enterprise platforms.",
+    creating: "Our technology capabilities support the design, modernization, integration, and operation of data platforms, middleware ecosystems, and cloud-native solutions. These capabilities provide the reusable building blocks required for scalable digital transformation.",
     capabilities: [
-      "LLM integration, prompt engineering, and RAG pipeline development",
-      "Intelligent document processing and unstructured data extraction",
-      "Robotic Process Automation (RPA) for back-office workflows",
-      "Computer vision systems for quality control and asset monitoring",
-      "AI product strategy, ethics review, and responsible deployment",
+"Data and database platforms",
+"Enterprise middleware and integration",
+"API and event-driven architectures",
+"Containers and cloud-native platforms",
+"Platform services and reusable engineering patterns"
     ],
-    image: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=900&h=600&fit=crop&auto=format",
+    image: "/portfolio/6.png",
   },
 ];
 
@@ -107,8 +110,8 @@ export interface ServiceCatalogueProps {
 
 export default function ServiceCatalogue({
   services = DEFAULT_SERVICES,
-  heading = "What we build.",
-  intro = "We are a full-service IT company delivering software, infrastructure, security, data, and AI solutions. Every engagement is outcome-focused and built to last.",
+  heading = "CIS Professional Services - Portfolio",
+  intro = "From advisory and architecture to engineering, automation, operations, and lifecycle optimization, our integrated portfolio enables organizations to modernize with confidence and translate technology investment into sustainable business value.",
   hideHeader = false,
   hideFooter = false,
   className = "",
@@ -125,7 +128,7 @@ export default function ServiceCatalogue({
               Service Catalogue
             </span>
             <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 4rem)", fontWeight: 800, lineHeight: 1.05, letterSpacing: "-0.03em", color: "#0F172A", marginTop: "0.4rem" }}>
-              What we{" "}<span style={{ color: "#1E40AF" }}>build.</span>
+              CIS{" "}<span style={{ color: "#1E40AF" }}>Professional Services</span>
             </h1>
           </div>
         </header>
@@ -232,7 +235,7 @@ function ServiceRow({
           <div className="px-6 md:px-10 py-8 grid md:grid-cols-5 gap-8 items-start">
 
             {/* Left — image */}
-            <div className="md:col-span-2 overflow-hidden rounded-lg border border-[#E2E8F0]" style={{ aspectRatio: "4/3", background: "#F1F5F9" }}>
+            <div className="md:col-span-2 overflow-hidden rounded-lg border border-[#E2E8F0]" style={{ aspectRatio: "3/4", background: "#F1F5F9" }}>
               <img
                 src={service.image}
                 alt={service.title}
