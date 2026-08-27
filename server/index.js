@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import crypto from 'node:crypto';
+import path from 'node:path';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -20,6 +21,8 @@ import { initializeDatabase } from './db.js';
 const app = express();
 const PORT = Number(process.env.PORT || 4000);
 const isProduction = process.env.NODE_ENV === 'production';
+const distDirectory = path.resolve(process.cwd(), 'dist');
+const clientEntry = path.join(distDirectory, 'index.html');
 const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',').map((origin) => origin.trim()).filter(Boolean);
 
 if (isProduction && !process.env.DATABASE_URL) throw new Error('DATABASE_URL is required in production.');
@@ -41,21 +44,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, limit: 20, standardHeaders: 'draft-7', legacyHeaders: false }));
 app.use('/api', rateLimit({ windowMs: 60 * 1000, limit: 300, standardHeaders: 'draft-7', legacyHeaders: false }));
 
-app.get('/', (req, res) => {
-  res.json({
-    ok: true,
-    service: 'CloudOrbix API',
-    message: 'CloudOrbix API is running. Use /api/* routes for the application data.',
-    timestamp: new Date().toISOString(),
-  });
-});
-
-app.get('/login', (req, res) => {
-  res.json({
-    ok: true,
-    message: 'Use the CloudOrbix frontend login page or POST to /api/auth/login.',
-  });
-});
+app.use(express.static(distDirectory));
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, service: 'CloudOrbix API', timestamp: new Date().toISOString() });
@@ -71,6 +60,11 @@ app.use('/api/audit', auditRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/services', serviceRoutes);
+
+app.use((req, res, next) => {
+  if (req.path === '/api' || req.path.startsWith('/api/')) return next();
+  res.sendFile(clientEntry);
+});
 
 if (process.env.SENTRY_DSN) Sentry.setupExpressErrorHandler(app);
 
