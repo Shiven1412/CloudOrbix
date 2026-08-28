@@ -71,7 +71,7 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
   /* Legacy KPI definitions retained temporarily for reference while the dashboard uses live KPIs.
   const legacyKpiCards = useMemo(() => [
     {
-      title: "Total Clients",
+      title: "Total Projects",
       value: String(summary.totalClients),
       change: "+8.3%",
       trend: "up" as const,
@@ -123,7 +123,7 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
       ],
     },
     {
-      title: "Azure Clients",
+      title: "Azure Projects",
       value: String(summary.azureClients),
       change: "+12%",
       trend: "up" as const,
@@ -135,7 +135,7 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
       percent: 40,
     },
     {
-      title: "AWS Clients",
+      title: "AWS Projects",
       value: String(summary.awsClients),
       change: "+7%",
       trend: "up" as const,
@@ -179,10 +179,10 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
   ], [summary]); */
 
   const kpiCards = useMemo(() => [
-    { title: "Total Clients", value: String(summary.totalClients), subtitle: "Approved client records", accent: "#1E40AF", icon: Users },
-    { title: "Active Clients (On Track)", value: String(summary.activeClients), subtitle: "On-track, in-progress, or onboarded", accent: "#16A34A", icon: UserCheck },
-    { title: "Total Revenue", value: `$${(summary.totalRevenue / 1000000).toFixed(2)}M`, subtitle: "Approved clients only", accent: "#0F766E", icon: Users },
-    { title: "Average Revenue Per Client", value: `$${summary.averageRevenue.toLocaleString()}`, subtitle: "Approved clients only", accent: "#0F766E", icon: Users },
+    { title: "Total Projects", value: String(summary.totalClients), subtitle: "Approved project records", accent: "#1E40AF", icon: Users },
+    { title: "Active Projects (On Track)", value: String(summary.activeClients), subtitle: "On-track, in-progress, or onboarded", accent: "#16A34A", icon: UserCheck },
+    { title: "Total Revenue", value: `$${(summary.totalRevenue / 1000000).toFixed(2)}M`, subtitle: "Approved projects only", accent: "#0F766E", icon: Users },
+    { title: "Average Revenue Per Project", value: `$${summary.averageRevenue.toLocaleString()}`, subtitle: "Approved projects only", accent: "#0F766E", icon: Users },
     { title: "Active Projects", value: String(summary.activeProjects), subtitle: "Approved projects", accent: "#1E40AF", icon: FolderKanban },
     { title: "Completed Projects", value: String(summary.completedProjects), subtitle: "Completed status or 100%", accent: "#16A34A", icon: CheckCircle2 },
     { title: "Delayed Projects", value: String(summary.delayedProjects), subtitle: "Delayed, blocked, or past due", accent: "#DC2626", icon: AlertTriangle },

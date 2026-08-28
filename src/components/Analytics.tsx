@@ -103,7 +103,7 @@ export default function Analytics({ dark }: AnalyticsProps) {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Cumulative Client Growth" subtitle="Active client base trajectory">
+        <ChartCard title="Cumulative Project Growth" subtitle="Active project base trajectory">
           <ResponsiveContainer width="100%" height={230}>
             <AreaChart data={netGrowth}>
               <defs>
@@ -116,7 +116,7 @@ export default function Analytics({ dark }: AnalyticsProps) {
               <XAxis dataKey="month" tick={{ fontSize: 11, fill: muted }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: muted }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip dark={dark} />} />
-              <Area type="monotone" dataKey="cumulative" stroke="#1E40AF" strokeWidth={2.5} fill="url(#cumGrad)" name="Total Clients" />
+              <Area type="monotone" dataKey="cumulative" stroke="#1E40AF" strokeWidth={2.5} fill="url(#cumGrad)" name="Total Projects" />
             </AreaChart>
           </ResponsiveContainer>
         </ChartCard>
@@ -142,7 +142,7 @@ export default function Analytics({ dark }: AnalyticsProps) {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Client Retention Rate" subtitle="Monthly retention % FY 2025">
+        <ChartCard title="Project Retention Rate" subtitle="Monthly retention % FY 2025">
           <ResponsiveContainer width="100%" height={230}>
             <LineChart data={retentionData}>
               <CartesianGrid strokeDasharray="3 3" stroke={dark ? "#334155" : "#F1F5F9"} />
@@ -169,7 +169,7 @@ export default function Analytics({ dark }: AnalyticsProps) {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Industry Distribution" subtitle="Client count by vertical">
+        <ChartCard title="Industry Distribution" subtitle="Project count by vertical">
           <ResponsiveContainer width="100%" height={230}>
             <PieChart>
               <Pie data={industryData} dataKey="value" nameKey="industry" cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={2}>
@@ -181,7 +181,7 @@ export default function Analytics({ dark }: AnalyticsProps) {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Client Lifecycle Funnel" subtitle="Prospect to onboarded conversion">
+        <ChartCard title="Project Lifecycle Funnel" subtitle="Prospect to onboarded conversion">
           <div className="space-y-2 mt-2">
             {funnelData.map((d, i) => (
               <div key={d.name}>
@@ -200,12 +200,12 @@ export default function Analytics({ dark }: AnalyticsProps) {
       </div>
 
       {/* Account Manager Performance */}
-      <ChartCard title="Account Manager Performance" subtitle="Clients managed, revenue generated, and satisfaction scores">
+      <ChartCard title="Account Manager Performance" subtitle="Projects managed, revenue generated, and satisfaction scores">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[500px]">
             <thead>
               <tr className="border-b" style={{ borderColor: border }}>
-                {["Account Manager", "Clients", "Revenue ($M)", "Satisfaction", "Performance"].map(h => (
+                {["Account Manager", "Projects", "Revenue ($M)", "Satisfaction", "Performance"].map(h => (
                   <th key={h} className="py-2 px-3 text-left text-xs font-semibold" style={{ color: muted }}>{h}</th>
                 ))}
               </tr>

@@ -76,7 +76,7 @@ export default function Login({ onLogin }: LoginProps) {
   const features = [
     { icon: Cloud, title: "Multi-Cloud Management", desc: "Azure, AWS, GCP lifecycle visibility" },
     { icon: BarChart3, title: "Executive Analytics", desc: "10-year trend dashboards & KPIs" },
-    { icon: Users, title: "Client Lifecycle Portal", desc: "End-to-end onboarding & offboarding" },
+    { icon: Users, title: "Project Lifecycle Portal", desc: "End-to-end onboarding & offboarding" },
     // { icon: Shield, title: "Enterprise Security", desc: "Role-based access with Entra ID SSO" },
   ];
 
@@ -114,7 +114,7 @@ export default function Login({ onLogin }: LoginProps) {
           </div>
 
           <h1 className="text-3xl font-bold text-white leading-tight mb-4">
-            Manage Client<br />
+            Manage Projects<br />
             <span className="text-blue-200">Lifecycles</span> with<br />
             Precision.
           </h1>

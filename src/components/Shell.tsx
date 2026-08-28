@@ -3,22 +3,27 @@ import {
   LayoutDashboard, Users, FileArchive,
   FileText, Settings, HelpCircle, Bell, Search, Moon, Sun,
   ChevronLeft, ChevronRight, LogOut, ChevronDown, Upload,
-  ClipboardList, Shield, Menu, X
+  ClipboardList, Shield, Menu, X, BookOpen, FolderKanban
 } from "lucide-react";
 import { type CloudOrbixAlert } from "../alert";
 
 export type Page =
-  | "dashboard" | "clients" | "reports" | "excel" | "audit" | "admin" | "help" | "project" | "documents" | "repository";
+  | "dashboard" | "clients" | "projectframework" | "reports" | "excel" | "audit" | "admin" | "help" | "project" | "documents" | "repository" | "servicecatalogue";
 
 const navItems: { id: Page; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "clients", label: "Projects", icon: Users },
-  { id: "repository", label: "Project Repository", icon: FileArchive },
+  { id: "servicecatalogue", label: "Service Catalogue", icon: BookOpen },
   { id: "reports", label: "Reports", icon: FileText },
   { id: "excel", label: "Excel Import", icon: Upload },
   { id: "audit", label: "Audit Logs", icon: ClipboardList },
   { id: "admin", label: "Admin", icon: Shield },
   { id: "help", label: "Help", icon: HelpCircle },
+];
+
+const projectManagementItems: { id: Page; label: string }[] = [
+  { id: "projectframework", label: "Project Framework" },
+  { id: "clients", label: "Projects" },
+  { id: "repository", label: "Project Repository" },
 ];
 
 interface ShellProps {
@@ -37,6 +42,7 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [projectManagementOpen, setProjectManagementOpen] = useState(true);
   const [screenAlert, setScreenAlert] = useState<CloudOrbixAlert | null>(null);
   const [alertTimer, setAlertTimer] = useState<number | null>(null);
   const [search, setSearch] = useState("");
@@ -108,7 +114,7 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
           <input
             value={search}
             onChange={e => { setSearch(e.target.value); onSearch?.(e.target.value); }}
-            placeholder="Search clients, reports, actions…"
+            placeholder="Search projects, reports, actions…"
             className="w-full pl-9 pr-4 py-1.5 rounded-lg text-xs border outline-none"
             style={{ background: dark ? "#1E293B" : "#F8FAFC", borderColor, color: textBody }}
           />
@@ -191,7 +197,57 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
           style={{ background: sidebarBg, borderColor }}
         >
           <div className="flex-1 py-3 overflow-y-auto">
-            {navItems.filter(({ id }) => !["admin", "excel", "audit"].includes(id) || user?.roles.includes("Admin")).map(({ id, label, icon: Icon }) => {
+            {navItems.filter(({ id }) => id === "dashboard").map(({ id, label, icon: Icon }) => {
+              const active = page === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => { onPageChange(id); setMobileOpen(false); }}
+                  title={collapsed ? label : undefined}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 mx-1.5 rounded-lg text-xs font-medium transition-all mb-0.5 ${collapsed ? "justify-center" : ""}`}
+                  style={{
+                    width: "calc(100% - 12px)",
+                    background: active ? "#EFF6FF" : "transparent",
+                    color: active ? "#1E40AF" : textMuted,
+                  }}
+                >
+                  <Icon className="w-4 h-4 flex-shrink-0" />
+                  {!collapsed && <span>{label}</span>}
+                  {!collapsed && active && <div className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "#1E40AF" }} />}
+                </button>
+              );
+            })}
+            <div className="mb-1">
+              <button
+                onClick={() => setProjectManagementOpen(!projectManagementOpen)}
+                aria-expanded={projectManagementOpen}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 mx-1.5 rounded-lg text-xs font-medium transition-all ${collapsed ? "justify-center" : ""}`}
+                style={{ width: "calc(100% - 12px)", color: textMuted }}
+                title={collapsed ? "Project Management" : undefined}
+              >
+                <FolderKanban className="w-4 h-4 flex-shrink-0" />
+                {!collapsed && <span className="flex-1 text-left">Project Management</span>}
+                {!collapsed && (projectManagementOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />)}
+              </button>
+              {projectManagementOpen && !collapsed && (
+                <div className="ml-5 border-l" style={{ borderColor }}>
+                  {projectManagementItems.map(({ id, label }) => {
+                    const active = page === id;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => { onPageChange(id); setMobileOpen(false); }}
+                        className="w-[calc(100%-1rem)] ml-2 flex items-center px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                        style={{ background: active ? "#EFF6FF" : "transparent", color: active ? "#1E40AF" : textMuted }}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            {navItems.filter(({ id }) => id !== "dashboard" && (!(["admin", "excel", "audit"] as Page[]).includes(id) || user?.roles.includes("Admin"))).map(({ id, label, icon: Icon }) => {
               const active = page === id;
               return (
                 <button
