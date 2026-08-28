@@ -60,16 +60,16 @@ const INITIAL_USERS: UserRecord[] = [];
 
 const ROLES = [
   { name: "Admin", color: "#DC2626", bg: "#FEE2E2", users: 1, permissions: ["All access", "User management", "System config", "Audit access", "Export all data"] },
-  { name: "Manager", color: "#7C3AED", bg: "#EDE9FE", users: 1, permissions: ["View all clients", "Approve onboarding", "Generate reports", "View analytics", "Export data"] },
-  { name: "Operations Team", color: "#1E40AF", bg: "#DBEAFE", users: 3, permissions: ["Manage clients", "Update lifecycle", "Import/export", "View analytics", "Create reports"] },
-  { name: "Viewer", color: "#64748B", bg: "#F1F5F9", users: 2, permissions: ["View clients", "View reports", "View analytics", "No edit access", "No export"] },
+  { name: "Manager", color: "#7C3AED", bg: "#EDE9FE", users: 1, permissions: ["View all projects", "Approve onboarding", "Generate reports", "View analytics", "Export data"] },
+  { name: "Operations Team", color: "#1E40AF", bg: "#DBEAFE", users: 3, permissions: ["Manage projects", "Update lifecycle", "Import/export", "View analytics", "Create reports"] },
+  { name: "Viewer", color: "#64748B", bg: "#F1F5F9", users: 2, permissions: ["View projects", "View reports", "View analytics", "No edit access", "No export"] },
 ];
 
 const PERMISSIONS = [
   { module: "Dashboard", admin: true, manager: true, ops: true, viewer: true },
-  { module: "Client Management (Read)", admin: true, manager: true, ops: true, viewer: true },
-  { module: "Client Management (Write)", admin: true, manager: true, ops: true, viewer: false },
-  { module: "Client Management (Delete)", admin: true, manager: false, ops: false, viewer: false },
+  { module: "Project Management (Read)", admin: true, manager: true, ops: true, viewer: true },
+  { module: "Project Management (Write)", admin: true, manager: true, ops: true, viewer: false },
+  { module: "Project Management (Delete)", admin: true, manager: false, ops: false, viewer: false },
   { module: "Onboarding / Offboarding", admin: true, manager: true, ops: true, viewer: false },
   { module: "Analytics", admin: true, manager: true, ops: true, viewer: true },
   { module: "Reports (View)", admin: true, manager: true, ops: true, viewer: true },
@@ -456,14 +456,14 @@ export default function Admin({ dark }: AdminProps) {
       {tab === "approvals" && (
         <div className="rounded-xl border overflow-hidden" style={{ background: bg, borderColor: border }}>
           <div className="px-5 py-4 border-b" style={{ borderColor: border }}>
-            <h3 className="font-semibold text-sm">Pending client approvals ({pendingClients.length})</h3>
-            <p className="text-xs mt-1" style={{ color: muted }}>Review client additions, edits, and completion requests.</p>
+            <h3 className="font-semibold text-sm">Pending project approvals ({pendingClients.length})</h3>
+            <p className="text-xs mt-1" style={{ color: muted }}>Review project additions, edits, and completion requests.</p>
           </div>
           {pendingClients.length ? pendingClients.map(client => (
             <div key={client.id} className="px-5 py-4 border-b flex items-center justify-between gap-4" style={{ borderColor: border }}>
               <div>
                 <div className="text-sm font-semibold">{client.clientName}</div>
-                <div className="text-xs" style={{ color: muted }}>{client.clientId} · {client.pendingCreate ? "New client" : "Client change"} · Requested status: {formatReviewValue(client.pendingPayload?.currentStatus || client.currentStatus)} · PM: {client.pendingPayload?.projectManager ? formatReviewValue(client.pendingPayload.projectManager) : client.projectManager || "Unassigned"}</div>
+                <div className="text-xs" style={{ color: muted }}>{client.clientId} · {client.pendingCreate ? "New project" : "Project change"} · Requested status: {formatReviewValue(client.pendingPayload?.currentStatus || client.currentStatus)} · PM: {client.pendingPayload?.projectManager ? formatReviewValue(client.pendingPayload.projectManager) : client.projectManager || "Unassigned"}</div>
               </div>
               <div className="flex gap-2">
                 <button onClick={() => void openClientReview(client.clientId)} className="px-3 py-2 rounded-lg text-xs font-semibold border" style={{ borderColor: border, color: text }}><Eye className="w-3.5 h-3.5 inline mr-1" />View details</button>
@@ -502,7 +502,7 @@ export default function Admin({ dark }: AdminProps) {
                 remarks: project.remarks,
               };
               const fields = [
-                ["Client name", "clientName"], ["Account manager", "accountManager"], ["Project managers", "projectManager"],
+                ["Project name", "clientName"], ["Account manager", "accountManager"], ["Project managers", "projectManager"],
                 ["Project status", "currentStatus"], ["Region", "region"], ["Industry", "industry"], ["Revenue", "revenue"],
                 ["Hyperscaler", "hyperscaler"], ["Project type", "projectType"], ["Project brief", "projectBrief"], ["ISOW", "isow"],
                 ["Estimated start", "estimatedStartDate"], ["Estimated end", "estimatedEndDate"], ["Actual start", "actualStartDate"], ["Actual end", "actualEndDate"],
@@ -511,7 +511,7 @@ export default function Admin({ dark }: AdminProps) {
               return (
                 <>
                   <div className="flex items-center justify-between mb-4">
-                    <div><h3 className="text-base font-semibold">Review {pending?.pendingCreate ? "new client" : "client change"}</h3><p className="text-xs mt-1" style={{ color: muted }}>{reviewClientId} · Compare requested values before approving</p></div>
+                    <div><h3 className="text-base font-semibold">Review {pending?.pendingCreate ? "new project" : "project change"}</h3><p className="text-xs mt-1" style={{ color: muted }}>{reviewClientId} · Compare requested values before approving</p></div>
                     <button onClick={() => setReviewClientId(null)} className="p-1.5 rounded-md" style={{ color: muted }} title="Close review"><X className="w-4 h-4" /></button>
                   </div>
                   <div className="grid grid-cols-[1fr_1fr_1fr] gap-2 text-xs">

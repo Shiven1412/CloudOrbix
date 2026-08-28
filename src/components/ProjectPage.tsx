@@ -705,7 +705,7 @@ export default function ProjectPage({
         className="flex items-center gap-2 text-xs font-semibold"
         style={{ color: "#1E40AF" }}
       >
-        <ArrowLeft className="w-4 h-4" /> Back to Clients
+        <ArrowLeft className="w-4 h-4" /> Back to Projects
       </button>
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>

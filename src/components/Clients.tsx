@@ -128,7 +128,7 @@ const INDUSTRIES = [
 ];
 const MANAGERS: string[] = [];
 
-const WIZARD_STEPS = ["Client Info", "Services", "Lifecycle", "Documents"];
+const WIZARD_STEPS = ["Project Info", "Services", "Lifecycle", "Documents"];
 const EMPTY_FORM = {
   name: "",
   id: "",
@@ -371,7 +371,7 @@ export default function Clients({
     const payload = {
       clientId:
         form.id || `CLT-${String(clientList.length + 1).padStart(3, "0")}`,
-      clientName: form.name || "New Client",
+      clientName: form.name || "New Project",
       accountManager: form.manager || "Unassigned",
       region: form.region || "North America",
       industry: form.industry || "Technology",
@@ -418,7 +418,7 @@ export default function Clients({
 
       if (body.pending) {
         showCloudOrbixAlert(
-          "Your client changes were submitted for admin approval.",
+          "Your project changes were submitted for admin approval.",
           "success",
         );
         setShowAdd(false);
@@ -514,7 +514,7 @@ export default function Clients({
   const deleteSelected = async () => {
     if (!user?.roles.includes("Admin") || !selected.length) return;
     setConfirmDialog({
-      message: `These ${selected.length} clients are about to be deleted. Do you want to continue?`,
+      message: `These ${selected.length} projects are about to be deleted. Do you want to continue?`,
       onConfirm: () => {
         setConfirmDialog(null);
         void Promise.all(
@@ -629,7 +629,7 @@ export default function Clients({
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors"
             style={{ background: "#1E40AF" }}
           >
-            <Plus className="w-3.5 h-3.5" /> Add Client
+            <Plus className="w-3.5 h-3.5" /> Add Project
           </button>
         </div>
       </div>
@@ -641,10 +641,10 @@ export default function Clients({
             className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5"
             style={{ color: muted }}
           />
-          <input
+            <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search clients…"
+            placeholder="Search projects…"
             className="pl-9 pr-4 py-2 rounded-lg border text-xs outline-none w-56"
             style={{ background: bg, borderColor: border, color: text }}
           />
@@ -708,9 +708,9 @@ export default function Clients({
                     )}
                   </button>
                 </th>
-                <Th col="id" label="Client ID" />
+                <Th col="id" label="Project ID" />
                 <Th col="year" label="Year" />
-                <Th col="name" label="Client Name" />
+                <Th col="name" label="Project Name" />
                 <Th col="accountManager" label="Account Manager" />
                 <Th col="region" label="Region" />
                 <Th col="industry" label="Industry" />
@@ -994,7 +994,7 @@ export default function Clients({
                           onClick={() => openEditClient(c)}
                           className="p-1.5 rounded-md hover:bg-blue-50 hover:text-blue-600 transition-colors"
                           style={{ color: muted }}
-                          title="Edit client"
+                          title="Edit project"
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </button>
@@ -1002,7 +1002,7 @@ export default function Clients({
                           onClick={() => openEditClient(c)}
                           className="p-1.5 rounded-md hover:bg-blue-50 hover:text-blue-600 transition-colors"
                           style={{ color: muted }}
-                          title="Edit client"
+                          title="Edit project"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
@@ -1068,7 +1068,7 @@ export default function Clients({
         </div>
       </div>
 
-      {/* Add Client Wizard Modal */}
+      {/* Add Project Wizard Modal */}
       {showAdd && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -1085,7 +1085,7 @@ export default function Clients({
             >
               <div>
                 <h2 className="font-bold text-base" style={{ color: text }}>
-                  {editingClientId ? "Edit Client" : "Add New Client"}
+                  {editingClientId ? "Edit Project" : "Add New Project"}
                 </h2>
                 <p className="text-xs mt-0.5" style={{ color: muted }}>
                   Step {step + 1} of 4 — {WIZARD_STEPS[step]}
@@ -1130,12 +1130,12 @@ export default function Clients({
                 <div className="grid grid-cols-2 gap-4">
                   {[
                     {
-                      label: "Client Name",
+                      label: "Project Name",
                       key: "name",
                       placeholder: "e.g. Northgate Technologies",
                     },
                     {
-                      label: "Client ID",
+                      label: "Project ID",
                       key: "id",
                       placeholder: "e.g. CLT-011",
                     },

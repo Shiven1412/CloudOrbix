@@ -34,7 +34,7 @@ export default function SimplePage({ page, dark }: SimplePageProps) {
       <div className="p-6 space-y-5" style={{ color: text }}>
         <div>
           <h1 className="text-xl font-bold">Onboarding</h1>
-          <p className="text-xs mt-0.5" style={{ color: muted }}>Track clients in onboarding pipeline</p>
+          <p className="text-xs mt-0.5" style={{ color: muted }}>Track projects in onboarding pipeline</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[{ label: "Pending Onboarding", value: pending.length, color: "#D97706", bg: "#FEF3C7" },
@@ -49,7 +49,7 @@ export default function SimplePage({ page, dark }: SimplePageProps) {
         </div>
         <div className="rounded-xl border overflow-hidden" style={{ background: bg, borderColor: border }}>
           <div className="px-5 py-4 border-b" style={{ borderColor: border }}>
-            <h3 className="font-semibold text-sm" style={{ color: text }}>Pending Onboarding Clients</h3>
+            <h3 className="font-semibold text-sm" style={{ color: text }}>Pending Onboarding Projects</h3>
           </div>
           {pending.map(c => (
             <div key={c.id} className="flex items-center gap-4 px-5 py-4 border-b" style={{ borderColor: border }}>
@@ -75,7 +75,7 @@ export default function SimplePage({ page, dark }: SimplePageProps) {
       <div className="p-6 space-y-5" style={{ color: text }}>
         <div>
           <h1 className="text-xl font-bold">Offboarding</h1>
-          <p className="text-xs mt-0.5" style={{ color: muted }}>Monitor clients scheduled for offboarding</p>
+          <p className="text-xs mt-0.5" style={{ color: muted }}>Monitor projects scheduled for offboarding</p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[{ label: "Scheduled Offboarding", value: scheduled.length, color: "#D97706", bg: "#FEF3C7" },
@@ -144,11 +144,11 @@ export default function SimplePage({ page, dark }: SimplePageProps) {
 
   if (page === "help") {
     const faqs = [
-      { q: "How do I onboard a new client?", a: "Go to Clients → Add Client and follow the 4-step wizard." },
-      { q: "How do I import clients via Excel?", a: "Go to Excel Import, download the template, fill it in, and drag-drop the file to upload." },
+      { q: "How do I onboard a new project?", a: "Go to Projects → Add Project and follow the 4-step wizard." },
+      { q: "How do I import projects via Excel?", a: "Go to Excel Import, download the template, fill it in, and drag-drop the file to upload." },
       { q: "Who can access the Admin panel?", a: "Only users with the Admin role can access Admin settings." },
       { q: "How do I schedule a recurring report?", a: "Go to Reports → Scheduled Reports and click Add." },
-      { q: "How do I export client data?", a: "From the Clients page click Export, or use Reports → Quick Export." },
+      { q: "How do I export project data?", a: "From the Projects page click Export, or use Reports → Quick Export." },
     ];
     return (
       <div className="p-6 space-y-5" style={{ color: text }}>

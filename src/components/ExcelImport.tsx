@@ -5,10 +5,10 @@ import { showCloudOrbixAlert } from "../alert";
 interface ExcelImportProps { dark: boolean; }
 
 const TEMPLATES = [
-  { name: "New Client Import", desc: "Template for importing new client records", rows: "Includes all required fields", icon: "👤" },
-  { name: "Client Updates", desc: "Template for bulk updating existing records", rows: "ID-based delta updates", icon: "✏️" },
-  { name: "Service Mapping", desc: "Map services to existing clients in bulk", rows: "Client ID + service columns", icon: "🔗" },
-  { name: "Revenue Reports", desc: "Import monthly revenue figures per client", rows: "Client ID + revenue + period", icon: "💰" },
+  { name: "New Project Import", desc: "Template for importing new project records", rows: "Includes all required fields", icon: "👤" },
+  { name: "Project Updates", desc: "Template for bulk updating existing records", rows: "ID-based delta updates", icon: "✏️" },
+  { name: "Service Mapping", desc: "Map services to existing projects in bulk", rows: "Project ID + service columns", icon: "🔗" },
+  { name: "Revenue Reports", desc: "Import monthly revenue figures per project", rows: "Project ID + revenue + period", icon: "💰" },
 ];
 
 export default function ExcelImport({ dark }: ExcelImportProps) {
@@ -76,7 +76,7 @@ export default function ExcelImport({ dark }: ExcelImportProps) {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold">Excel Import & Export</h1>
-          <p className="text-xs mt-0.5" style={{ color: muted }}>Bulk import client data · Download templates · Export reports</p>
+          <p className="text-xs mt-0.5" style={{ color: muted }}>Bulk import project data · Download templates · Export reports</p>
         </div>
         {stage !== "idle" && (
           <button onClick={() => { setStage("idle"); setFileName(""); setProgress(0); }}
@@ -170,7 +170,7 @@ export default function ExcelImport({ dark }: ExcelImportProps) {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b" style={{ borderColor: border, background: subtle }}>
-                        {["Client ID", "Name", "Manager", "Region", "Industry", "Validation"].map(h => (
+                        {["Project ID", "Name", "Manager", "Region", "Industry", "Validation"].map(h => (
                           <th key={h} className="px-4 py-2.5 text-left text-xs font-semibold" style={{ color: muted }}>{h}</th>
                         ))}
                       </tr>

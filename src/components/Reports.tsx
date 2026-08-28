@@ -5,7 +5,7 @@ interface ReportsProps { dark: boolean; }
 
 const REPORT_TYPES = [
   ["executive-kpi", "Executive KPI Dashboard"], ["project-manager-performance", "Project Manager Performance Report"], ["account-manager-performance", "Account Manager Performance Report"],
-  ["revenue", "Revenue Report"], ["client-lifecycle", "Client Lifecycle Report"], ["project-delivery", "Project Delivery Report"], ["service-adoption", "Service Adoption Report"],
+  ["revenue", "Revenue Report"], ["project-lifecycle", "Project Lifecycle Report"], ["project-delivery", "Project Delivery Report"], ["service-adoption", "Service Adoption Report"],
   ["risk-management", "Risk Management Report"], ["task-management", "Task Management Report"], ["regional-performance", "Regional Performance Report"], ["industry-analysis", "Industry Analysis Report"],
   ["hyperscaler-adoption", "Hyperscaler Adoption Report"], ["status-distribution", "Status Distribution Report"], ["audit-activity", "Audit Activity Report"], ["excel-import", "Excel Import Report"],
   ["project-updates", "Project Updates Report"], ["document-repository", "Document Repository Report"],
@@ -13,7 +13,7 @@ const REPORT_TYPES = [
 
 const RECENT_REPORTS = [
   { name: "Q2 2025 Revenue Report", type: "Revenue", generated: "Aug 1, 2025", format: "PDF", size: "2.4 MB", status: "ready" },
-  { name: "July Client Lifecycle Report", type: "Lifecycle", generated: "Aug 1, 2025", format: "Excel", size: "1.8 MB", status: "ready" },
+  { name: "July Project Lifecycle Report", type: "Lifecycle", generated: "Aug 1, 2025", format: "Excel", size: "1.8 MB", status: "ready" },
   { name: "H1 Executive KPI Summary", type: "Executive KPI", generated: "Jul 1, 2025", format: "PDF", size: "3.1 MB", status: "ready" },
   { name: "Service Adoption Q2 2025", type: "Service Adoption", generated: "Jul 1, 2025", format: "PDF", size: "1.2 MB", status: "ready" },
   { name: "Annual Revenue Report 2024", type: "Revenue", generated: "Jan 1, 2025", format: "Excel", size: "4.7 MB", status: "ready" },
@@ -201,8 +201,8 @@ export default function Reports({ dark }: ReportsProps) {
             <h3 className="font-semibold text-sm mb-3" style={{ color: text }}>Quick Export</h3>
             <div className="space-y-2">
               {[
-                { label: "Export All Clients (CSV)", icon: "📊" },
-                { label: "Export Active Clients (Excel)", icon: "📗" },
+                { label: "Export All Projects (CSV)", icon: "📊" },
+                { label: "Export Active Projects (Excel)", icon: "📗" },
                 { label: "Export Revenue Data (PDF)", icon: "📄" },
                 { label: "Export Audit Logs (CSV)", icon: "📋" },
               ].map(e => (
