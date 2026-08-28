@@ -134,15 +134,15 @@ export default function ServiceCatalogue({
         </header>
       )}
 
-      <div className="px-8 md:px-16 py-10 grid md:grid-cols-2 gap-8 border-b border-[#E2E8F0] bg-white">
-        <p style={{ fontWeight: 400, fontSize: "clamp(0.95rem, 1.3vw, 1.1rem)", lineHeight: 1.75, color: "#64748B", maxWidth: "520px" }}>
+      <div className="px-8 md:px-16 py-10 grid border-b border-[#E2E8F0] bg-white">
+        <p style={{ textAlign: "justify", fontWeight: 400, fontSize: "clamp(0.95rem, 1.3vw, 1.1rem)", lineHeight: 1.75, color: "#64748B" }}>
           {intro}
         </p>
-        <div className="flex items-end justify-start md:justify-end">
+        {/* <div className="flex items-end justify-start md:justify-end">
           <span style={{ fontWeight: 800, fontSize: "clamp(4rem, 10vw, 8rem)", lineHeight: 0.85, color: "#DBEAFE", letterSpacing: "-0.04em" }}>
             {String(services.length).padStart(2, "0")}
           </span>
-        </div>
+        </div> */}
       </div>
 
       <div className="bg-white mt-4 mx-4 md:mx-8 rounded-xl border border-[#E2E8F0] overflow-hidden shadow-sm">
@@ -161,10 +161,10 @@ export default function ServiceCatalogue({
       {!hideFooter && (
         <footer className="px-8 md:px-16 py-8 mt-4 flex flex-col md:flex-row justify-between gap-4">
           <span className="mono" style={{ fontSize: "11px", letterSpacing: "0.14em", color: "#CBD5E1" }}>
-            © {new Date().getFullYear()} Studio — All rights reserved
+            © {new Date().getFullYear()} CIS Professional Services
           </span>
           <span className="mono" style={{ fontSize: "11px", letterSpacing: "0.14em", color: "#CBD5E1" }}>
-            SOFTWARE · CLOUD · SECURITY · DATA · AI
+            {/* SOFTWARE · CLOUD · SECURITY · DATA · AI */}
           </span>
         </footer>
       )}
