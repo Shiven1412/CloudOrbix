@@ -151,6 +151,7 @@ export default function ServiceCatalogue({
             <ServiceRow
               key={s.index}
               service={s}
+              index={i}
               isActive={active === i}
               onToggle={() => setActive(active === i ? null : i)}
             />
@@ -174,10 +175,12 @@ export default function ServiceCatalogue({
 
 function ServiceRow({
   service,
+  index,
   isActive,
   onToggle,
 }: {
   service: Service;
+  index: number;
   isActive: boolean;
   onToggle: () => void;
 }) {
@@ -235,7 +238,7 @@ function ServiceRow({
           <div className="px-6 md:px-10 py-8 grid md:grid-cols-5 gap-8 items-start">
 
             {/* Left — image */}
-            <div className="md:col-span-2 overflow-hidden rounded-lg border border-[#E2E8F0]" style={{ aspectRatio: "3/4", background: "#F1F5F9" }}>
+            <div className={"md:col-span-2 " + (index % 2 !== 0 ? "md:order-2" : "md:order-1") + " overflow-hidden rounded-lg border border-[#E2E8F0]"} style={{ aspectRatio: "3/4", background: "#F1F5F9" }}>
               <img
                 src={service.image}
                 alt={service.title}
@@ -245,7 +248,7 @@ function ServiceRow({
             </div>
 
             {/* Right — content */}
-            <div className="md:col-span-3 flex flex-col gap-6">
+            <div className={"md:col-span-3 " + (index % 2 !== 0 ? "md:order-1" : "md:order-2") + " flex flex-col gap-6"}>
 
               {/* Creating paragraph */}
               <div>
