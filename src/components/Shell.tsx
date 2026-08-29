@@ -3,12 +3,12 @@ import {
   LayoutDashboard, Users, FileArchive,
   FileText, Settings, HelpCircle, Bell, Search, Moon, Sun,
   ChevronLeft, ChevronRight, LogOut, ChevronDown, Upload,
-  ClipboardList, Shield, Menu, X, BookOpen, FolderKanban
+  ClipboardList, Shield, Menu, X, BookOpen, FolderKanban, UserCircle2
 } from "lucide-react";
 import { type CloudOrbixAlert } from "../alert";
 
 export type Page =
-  | "dashboard" | "clients" | "projectframework" | "reports" | "excel" | "audit" | "admin" | "help" | "project" | "documents" | "repository" | "servicecatalogue";
+  | "dashboard" | "clients" | "projectframework" | "reports" | "excel" | "audit" | "admin" | "help" | "project" | "documents" | "repository" | "servicecatalogue" | "profile";
 
 const navItems: { id: Page; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -75,6 +75,7 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
   const textMuted = dark ? "#94A3B8" : "#64748B";
   const textBody = dark ? "#E2E8F0" : "#0F172A";
   const pageBg = dark ? "#0F172A" : "#F1F5F9";
+  const roleLabel = user?.roles?.[0] === "Admin" ? "System Administrator" : (user?.roles?.[0] || "Account Manager");
 
   const [notifications, setNotifications] = useState<{ id: string; text: string; type: string; time: string }[]>([]);
   useEffect(() => {
@@ -168,7 +169,7 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
               <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: "#1E40AF" }}>SC</div>
               <div className="hidden sm:block text-left">
                 <div className="text-xs font-semibold" style={{ color: textBody }}>{user ? `${user.firstName} ${user.lastName}` : ""}</div>
-                <div className="text-[10px]" style={{ color: textMuted }}>{user ? user.roles[0] : "Account Manager"}</div>
+                <div className="text-[10px]" style={{ color: textMuted }}>{roleLabel}</div>
               </div>
               <ChevronDown className="w-3 h-3" style={{ color: textMuted }} />
             </button>
@@ -177,7 +178,11 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
                 <div className="p-3 border-b" style={{ borderColor }}>
                   <div className="text-xs font-semibold" style={{ color: textBody }}>{user ? `${user.firstName} ${user.lastName}` : ""}</div>
                   <div className="text-[10px]" style={{ color: textMuted }}>{user ? user.email : "s.chen@enterprise.com"}</div>
+                  <div className="mt-1 text-[10px] font-medium" style={{ color: textMuted }}>{roleLabel}</div>
                 </div>
+                <button onClick={() => { onPageChange("profile"); setProfileOpen(false); }} className="w-full text-left px-3 py-2 text-xs hover:bg-slate-50 flex items-center gap-2" style={{ color: textBody }}>
+                  <UserCircle2 className="w-3.5 h-3.5" /> My Profile
+                </button>
                 <button onClick={() => { onPageChange("admin"); setProfileOpen(false); }} className="w-full text-left px-3 py-2 text-xs hover:bg-slate-50 flex items-center gap-2" style={{ color: textBody }}>
                   <Settings className="w-3.5 h-3.5" /> Settings
                 </button>

@@ -16,6 +16,7 @@ import auditRoutes from './routes/audit.js';
 import reportRoutes from './routes/reports.js';
 import projectRoutes from './routes/projects.js';
 import serviceRoutes from './routes/services.js';
+import profileTasksRoutes from './routes/profile-tasks.js';
 import { initializeDatabase } from './db.js';
 
 const app = express();
@@ -60,6 +61,7 @@ app.use('/api/audit', auditRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/services', serviceRoutes);
+app.use('/api/profile-tasks', profileTasksRoutes);
 
 app.use((req, res, next) => {
   if (req.path === '/api' || req.path.startsWith('/api/')) return next();
