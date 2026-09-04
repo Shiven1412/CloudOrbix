@@ -179,17 +179,17 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
   ], [summary]); */
 
   const kpiCards = useMemo(() => [
-    { title: "Total Projects", value: String(summary.totalClients), subtitle: "Approved project records", accent: "#1E40AF", icon: Users },
+    { title: "Total Projects", value: String(summary.totalClients), subtitle: "Approved project records", accent: "#1E40AF", icon: Users, action: () => onNavigate("clients") },
     { title: "Active Projects (On Track)", value: String(summary.activeClients), subtitle: "On-track, in-progress, or onboarded", accent: "#16A34A", icon: UserCheck },
     { title: "Total Revenue", value: `$${(summary.totalRevenue / 1000000).toFixed(2)}M`, subtitle: "Approved projects only", accent: "#0F766E", icon: Users },
     { title: "Average Revenue Per Project", value: `$${summary.averageRevenue.toLocaleString()}`, subtitle: "Approved projects only", accent: "#0F766E", icon: Users },
     { title: "Active Projects", value: String(summary.activeProjects), subtitle: "Approved projects", accent: "#1E40AF", icon: FolderKanban },
     { title: "Completed Projects", value: String(summary.completedProjects), subtitle: "Completed status or 100%", accent: "#16A34A", icon: CheckCircle2 },
     { title: "Delayed Projects", value: String(summary.delayedProjects), subtitle: "Delayed, blocked, or past due", accent: "#DC2626", icon: AlertTriangle },
-    { title: "Open Risks", value: String(summary.openRisks), subtitle: "Open project risks", accent: "#D97706", icon: AlertTriangle },
+    { title: "Open Risks", value: String(summary.openRisks), subtitle: "Open project risks", accent: "#D97706", icon: AlertTriangle, action: () => onNavigate("risks") },
     { title: "High Risks", value: String(summary.highRisks), subtitle: "Open high-level risks", accent: "#DC2626", icon: ShieldAlert },
     { title: "Average Project Completion %", value: `${summary.averageCompletion.toFixed(1)}%`, subtitle: "Average across approved projects", accent: "#2563EB", icon: CheckCircle2 },
-  ], [summary]);
+  ], [summary, onNavigate]);
 
   const bg = dark ? "#1E293B" : "#FFFFFF";
   const border = dark ? "#334155" : "#E2E8F0";
@@ -235,7 +235,11 @@ export default function Dashboard({ dark, onNavigate, user }: DashboardProps) {
             icon: card.icon,
             subtitle: card.subtitle,
           };
-          return <KPICard key={card.title} {...commonProps} />;
+          return (
+            <button key={card.title} type="button" onClick={card.action} className="text-left w-full" aria-label={`Open ${card.title}`}>
+              <KPICard {...commonProps} />
+            </button>
+          );
         })}
       </div>
 

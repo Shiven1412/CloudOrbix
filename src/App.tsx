@@ -16,6 +16,7 @@ const ProjectRepository = lazy(() => import("./components/ProjectRepository"));
 const ServiceCatalogue = lazy(() => import("./components/ServiceCatalogue"));
 const ProjectFramework = lazy(() => import("./components/ProjectFramework"));
 const ProfilePage = lazy(() => import("./components/ProfilePage"));
+const RiskRegisterPage = lazy(() => import("./components/RiskRegisterPage"));
 
 type AuthUser = {
   id: number;
@@ -37,7 +38,7 @@ const getStoredUser = (): AuthUser | null => {
 
 const getInitialPage = (): Page => {
   const hash = window.location.hash.replace(/^#/, "") as Page;
-  const validPages: Page[] = ["dashboard", "clients", "projectframework", "reports", "excel", "audit", "admin", "help", "project", "documents", "repository", "servicecatalogue", "profile"];
+  const validPages: Page[] = ["dashboard", "clients", "projectframework", "reports", "excel", "audit", "admin", "help", "project", "documents", "repository", "servicecatalogue", "profile", "risks"];
   return validPages.includes(hash) ? hash : "dashboard";
 };
 
@@ -136,6 +137,7 @@ export default function App() {
       case "audit":       return user.roles.includes("Admin") ? <AuditLogs dark={dark} /> : <Dashboard dark={dark} onNavigate={p => navigateTo(p as Page)} user={user} />;
       case "admin":       return user.roles.includes("Admin") ? <Admin dark={dark} user={user} /> : <Dashboard dark={dark} onNavigate={p => navigateTo(p as Page)} user={user} />;
       case "profile":     return <ProfilePage dark={dark} user={user} onOpenProject={(id) => openProject(id)} />;
+      case "risks":       return <RiskRegisterPage dark={dark} user={user} onOpenProject={(id) => openProject(id, "project")} />;
       case "help":        return <SimplePage page={page} dark={dark} />;
       default:            return <Dashboard dark={dark} onNavigate={p => setPage(p as Page)} user={user} />;
     }

@@ -12,6 +12,7 @@ export const appState = {
   statusHistory: [],
   auditLogs: [],
   excelImportLogs: [],
+  notifications: [],
 };
 
 let pool = null;
@@ -158,4 +159,28 @@ export function createImportLog(payload) {
     failed: payload.failed,
     createdAt: new Date().toISOString(),
   });
+}
+
+export function createNotification(userEmail, type, title, message, metadata = {}) {
+  const normalizedEmail = String(userEmail || '').trim().toLowerCase();
+  const entry = {
+    id: Date.now(),
+    userEmail: normalizedEmail,
+    type,
+    title,
+    message,
+    metadata,
+    read: false,
+    createdAt: new Date().toISOString(),
+  };
+
+  appState.notifications.unshift(entry);
+  return entry;
+}
+
+export function listNotificationsForUser(userEmail) {
+  const normalizedEmail = String(userEmail || '').trim().toLowerCase();
+  return appState.notifications
+    .filter((notification) => notification.userEmail === normalizedEmail)
+    .sort((left, right) => new Date(right.createdAt).valueOf() - new Date(left.createdAt).valueOf());
 }

@@ -29,6 +29,27 @@ async function syncCompletion(clientDbId) {
   return completion;
 }
 
+router.get('/risks', protectRoute, async (req, res, next) => {
+  try {
+    const pool = getPool();
+    if (!pool) return res.json({ risks: [] });
+    const result = await pool.query(`
+      SELECT pr.*, c.client_id, c.client_name, c.project_manager, c.account_manager
+      FROM project_risks pr
+      LEFT JOIN clients c ON c.id = pr.client_id
+      ORDER BY pr.created_at DESC
+    `);
+    return res.json({
+      risks: result.rows.map((risk) => ({
+        ...risk,
+        clientId: risk.client_id,
+        client_name: risk.client_name || risk.customer_name || '-',
+        project_manager: risk.project_manager || risk.account_manager || '-',
+      })),
+    });
+  } catch (error) { return next(error); }
+});
+
 router.get('/repository', protectRoute, async (req, res, next) => {
   try {
     const result = await getPool().query(`SELECT c.client_id,c.client_name,c.project_manager,c.completion,c.current_status,COUNT(pd.id)::int document_count FROM clients c LEFT JOIN project_documents pd ON pd.client_id=c.id WHERE c.current_status='Completed' OR c.completion >= 100 GROUP BY c.id ORDER BY c.updated_at DESC`);

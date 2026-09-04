@@ -8,7 +8,7 @@ import {
 import { type CloudOrbixAlert } from "../alert";
 
 export type Page =
-  | "dashboard" | "clients" | "projectframework" | "reports" | "excel" | "audit" | "admin" | "help" | "project" | "documents" | "repository" | "servicecatalogue" | "profile";
+  | "dashboard" | "clients" | "projectframework" | "reports" | "excel" | "audit" | "admin" | "help" | "project" | "documents" | "repository" | "servicecatalogue" | "profile" | "risks";
 
 const navItems: { id: Page; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -81,10 +81,18 @@ export default function Shell({ page, onPageChange, onLogout, dark, user, onTogg
   useEffect(() => {
     const token = localStorage.getItem("clmp-token");
     if (!token) return;
-    fetch("/api/dashboard", { headers: { Authorization: `Bearer ${token}` } }).then((response) => response.ok ? response.json() : null).then((payload) => {
-      const alerts = (payload?.upcomingActivities || []).map((item: any, index: number) => ({ id: `${item.client}-${index}`, text: item.type === "delay" ? `Project delay requires attention: ${item.client}` : `${item.type === "offboarding" ? "Offboarding" : "Onboarding"} due for ${item.client}`, type: item.type === "delay" ? "warning" : item.type === "offboarding" ? "warning" : "info", time: item.date }));
-      setNotifications(alerts);
-    }).catch(() => undefined);
+    fetch("/api/users/notifications", { headers: { Authorization: `Bearer ${token}` } })
+      .then((response) => response.ok ? response.json() : null)
+      .then((payload) => {
+        const alerts = (payload?.notifications || []).slice(0, 6).map((item: any) => ({
+          id: `${item.id || item.title}-${item.createdAt || item.created_at || Math.random()}`,
+          text: item.title || item.message || "Project update",
+          type: item.type === "approval" ? "info" : "warning",
+          time: new Date(item.createdAt || item.created_at || Date.now()).toLocaleDateString(),
+        }));
+        setNotifications(alerts.length ? alerts : [{ id: "empty", text: "No new alerts", type: "info", time: "Now" }]);
+      })
+      .catch(() => setNotifications([{ id: "fallback", text: "No new alerts", type: "info", time: "Now" }]));
   }, [user]);
 
   return (

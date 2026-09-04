@@ -138,11 +138,8 @@ export default function Login({ onLogin }: LoginProps) {
         </div>
 
         <div className="relative z-10 flex items-center gap-6 text-blue-200 text-xs">
-          <span>v2.4.1 — Production</span>
-          <span>•</span>
-          <span>SOC 2 Type II Compliant</span>
-          <span>•</span>
-          <span>ISO 27001</span>
+          <span>v1.0.0 — Production</span>
+          
         </div>
       </div>
 
@@ -264,7 +261,7 @@ export default function Login({ onLogin }: LoginProps) {
           <div className="mt-8 p-4 rounded-lg bg-slate-50 border border-slate-100">
             <div className="text-xs text-slate-500 text-center mb-2 font-medium">Need help?</div>
             <div className="flex justify-center gap-4 text-xs text-blue-600">
-              <a href="#" className="hover:underline">IT Support</a>
+              <a href="mailto:shivendra.anand-tripathi@capgemini.com?subject=CloudOrbix%20IT%20Support" className="hover:underline">IT Support</a>
               <span className="text-slate-300">|</span>
               <a href="#" onClick={e => { e.preventDefault(); setResetMode(true); setError("Enter your current password above, then choose a new password."); }} className="hover:underline">Reset Password</a>
               <span className="text-slate-300">|</span>

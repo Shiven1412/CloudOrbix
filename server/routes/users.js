@@ -1,5 +1,5 @@
 import express from 'express';
-import { appState, getPool, hashPassword } from '../db.js';
+import { appState, getPool, hashPassword, listNotificationsForUser } from '../db.js';
 import { protectRoute, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -32,6 +32,11 @@ router.get('/', protectRoute, requireRole('Admin', 'Manager', 'Operations Team')
     `);
     return res.json({ users: result.rows.map((row) => publicUser({ id: row.id, email: row.email, firstName: row.first_name, lastName: row.last_name, isActive: row.is_active, roles: row.roles })) });
   } catch (error) { return next(error); }
+});
+
+router.get('/notifications', protectRoute, async (req, res) => {
+  const notifications = listNotificationsForUser(req.user.email);
+  return res.json({ notifications });
 });
 
 router.post('/', protectRoute, requireRole('Admin'), async (req, res, next) => {
